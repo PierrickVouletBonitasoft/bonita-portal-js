@@ -566,6 +566,37 @@ module.exports = function (grunt) {
           src: [ 'main/common/**/*.js', 'main/features/**/*.js', 'test/**/*.js']
         }
       }
+    },
+    mutationTest: {
+      options: {
+        karma: {
+          configFile: 'karma.conf.js',
+          fileSpecs: 'test/spec/mapping.spec.json',
+          waitForRunnerTime: 10
+        },
+        reporters: {
+          html:{
+            dir: 'reports/grunt-mutation-testing',
+            successThreshold: 90
+          },
+          console: true
+        }
+      },
+      all: {
+        options: {
+          code: [
+            'main/common/**/*.js',
+            'main/features/**/*.js',
+            'test/spec/**/*.js'
+          ],
+          specs: '**/*.spec.js',
+          mutate: 'main/common/services/feature-manager.js',
+          logLevel: 'ALL'
+        },
+        files: {
+          'main/common/services/feature-manager.js' : '**/*.spec.js'
+        }
+      }
     }
   });
 
@@ -613,6 +644,14 @@ module.exports = function (grunt) {
     'autoprefixer',
     'connect:test',
     'karma'
+  ]);
+
+  grunt.registerTask('mutate', [
+    'clean:server',
+    'concurrent:test',
+    'autoprefixer',
+    'connect:test',
+    'mutationTest:all'
   ]);
 
   grunt.registerTask('buildE2e', [
