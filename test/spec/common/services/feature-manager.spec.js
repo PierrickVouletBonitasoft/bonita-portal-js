@@ -51,6 +51,7 @@
     });*/
     it('should fail', function() {
       console.log('poueeeeeeeeeeeeet');
+      fail();
     //  expect(true).toEqual(false);
     });
     describe('isSearchIndexedFeatureActivated', function() {

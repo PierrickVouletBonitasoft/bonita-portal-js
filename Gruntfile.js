@@ -571,7 +571,6 @@ module.exports = function (grunt) {
       options: {
         karma: {
           configFile: 'karma.conf.js',
-          fileSpecs: 'test/spec/mapping.spec.json',
           waitForRunnerTime: 10
         },
         reporters: {
@@ -586,15 +585,14 @@ module.exports = function (grunt) {
         options: {
           code: [
             'main/common/**/*.js',
-            'main/features/**/*.js',
-            'test/spec/**/*.js'
+            'main/features/**/*.js'
           ],
-          specs: '**/*.spec.js',
+          specs: 'test/spec/**/*.spec.js',
           mutate: 'main/common/services/feature-manager.js',
           logLevel: 'ALL'
         },
         files: {
-          'main/common/services/feature-manager.js' : '**/*.spec.js'
+          'main/common/services/feature-manager.js' : 'test/spec/**/*.spec.js'
         }
       }
     }

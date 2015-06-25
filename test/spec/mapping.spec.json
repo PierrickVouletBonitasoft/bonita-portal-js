@@ -1,4 +1,4 @@
 {
   "main/common/services/i18n.js" : ["test/spec/common/services/i18n.spec.js"],
-  "main/common/services/feature-manager.js" : []
+  "main/common/services/feature-manager.js" : ["test/spec/common/services/feature-manager.spec.js"]
 }
