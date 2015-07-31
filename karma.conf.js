@@ -32,13 +32,15 @@ module.exports = function(config) {
       'main/assets/angular-bootstrap/ui-bootstrap-tpls.js',
       'main/assets/jqueryui/ui/jquery-ui.js',
       'main/assets/angular-gettext/dist/angular-gettext.js',
+      'main/assets/bootstrap/dist/js/bootstrap.js',
+      'main/assets/ng-sortable/dist/ng-sortable.js',
+      'main/assets/ngstorage/ngStorage.js',
+      'main/assets/bonita-js-components/dist/bonita-lib-tpl.js',
       'main/assets/jquery-resizable-columns/dist/jquery.resizableColumns.min.js',
       'main/assets/angular-growl-2/build/angular-growl.js',
       'main/assets/angular-animate/angular-animate.js',
       'main/assets/angular-multi-select/isteven-multi-select.js',
       'main/assets/angular-sanitize/angular-sanitize.js',
-      'main/assets/ng-sortable/dist/ng-sortable.js',
-      'main/assets/bonita-js-components/dist/bonita-lib-tpl.js',
       'main/assets/moment/min/moment-with-locales.js',
       'main/assets/numeral/numeral.js',
       'main/assets/numeral/languages.js',
@@ -47,15 +49,14 @@ module.exports = function(config) {
       'main/assets/angular-xeditable/dist/js/xeditable.js',
       'main/assets/bootstrap-toggle/js/bootstrap-toggle.min.js',
       'main/assets/lodash/lodash.js',
-      'main/assets/bootstrap/dist/js/bootstrap.js',
       'main/assets/bootstrap-tags/dist/js/bootstrap-tags.js',
-      'main/assets/ngstorage/ngStorage.js',
       'main/assets/angular-mocks/angular-mocks.js',
       // endbower
       'main/common/**/*.js',
       'main/features/**/*.js',
       'main/features/**/*.html',
       'main/bonita-portal.js',
+      'test/spec/fixtures/i18nMock.js',
       'test/spec/**/*.js'
     ],
 
@@ -67,7 +68,7 @@ module.exports = function(config) {
 
     // level of logging
     // possible values: LOG_DISABLE || LOG_ERROR || LOG_WARN || LOG_INFO || LOG_DEBUG
-    logLevel: config.LOG_DEBUG,
+    logLevel: config.LOG_INFO,
 
 
     // enable / disable watching file and executing tests whenever any file changes
@@ -82,7 +83,7 @@ module.exports = function(config) {
     // - Safari (only Mac)
     // - PhantomJS
     // - IE (only Windows)
-    browsers: ['Chrome'],
+    browsers: ['PhantomJS'],
 
 
     // Continuous Integration mode
