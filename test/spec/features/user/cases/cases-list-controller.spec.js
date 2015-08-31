@@ -14,14 +14,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* global cases, describe  */
+/* global cases, sessionsMock, describe  */
 (function() {
   'use strict';
-  describe('admin cases list features', function() {
+  describe('user cases list features', function() {
 
-    var scope, caseAPI, fullCases, promise, q, deferred, casesCtrl;
+    var scope, sessionAPI, caseAPI, humanTaskAPI, fullCases, q, caseDeferred, casePromise, humanTaskDeferred, humanTaskPromise, sessionDeferred, sessionPromise, casesCtrl;
 
-    beforeEach(module('org.bonitasoft.features.admin.cases.list.table'));
+    beforeEach(module('org.bonitasoft.features.user.cases.list.table'));
 
     beforeEach(inject(function($rootScope, $q) {
       //we use the casesListMocks.js in order to init data for the test
@@ -33,16 +33,29 @@
       };
       q = $q;
       scope = $rootScope.$new();
-      deferred = q.defer();
-      promise = deferred.promise;
+      caseDeferred = q.defer();
+      casePromise = caseDeferred.promise;
+      humanTaskDeferred = q.defer();
+      humanTaskPromise = humanTaskDeferred.promise;
+      sessionDeferred = q.defer();
+      sessionPromise = sessionDeferred.promise;
+
       caseAPI = jasmine.createSpyObj('caseAPI', ['search']);
       caseAPI.search.and.returnValue({
-        $promise: promise
+        $promise: casePromise
       });
-      angular.module('org.bonitasoft.features.admin.cases.list.table').value('tabName', 'active');
+      humanTaskAPI = jasmine.createSpyObj('humanTaskAPI', ['search']);
+      humanTaskAPI.search.and.returnValue({
+        $promise: humanTaskPromise
+      });
+      sessionAPI = jasmine.createSpyObj('sessionAPI', ['get']);
+      sessionAPI.get.and.returnValue({
+        $promise: sessionPromise
+      });
+      angular.module('org.bonitasoft.features.user.cases.list.table').value('tabName', 'active');
     }));
 
-    describe('controller initialization', function() {
+    describe('controller initialization ', function() {
 
       var defaultPageSize = 1000;
       var defaultSort = 'id';
@@ -51,14 +64,13 @@
 
       describe('with incorrect columns', function() {
         beforeEach(inject(function($controller) {
-          casesCtrl = $controller('ActiveCaseListCtrl', {
+          casesCtrl = $controller('ActiveCaseListUserCtrl', {
             '$scope': scope,
+            'sessionAPI': sessionAPI,
             'caseAPI': caseAPI,
+            'humanTaskAPI': humanTaskAPI,
             'defaultPageSize': defaultPageSize,
-            'defaultSort': defaultSort,
-            'defaultDeployedFields': defaultDeployedFields,
-            'defaultActiveCounterFields': defaultActiveCounterFields,
-            'casesColumns': [{
+            'casesUserColumns': [{
               name: 'AppName',
               sortName: 'name',
               path: ['processDefinitionId', 'name']
@@ -71,6 +83,10 @@
               sortName: 'id',
               path: ['idsdf']
             }],
+            'defaultSort': defaultSort,
+            'defaultDeployedFields': defaultDeployedFields,
+            'defaultActiveCounterFields': defaultActiveCounterFields,
+
             'processId': undefined,
             'supervisorId': undefined,
             'tabName': 'active',
@@ -79,7 +95,9 @@
           casesCtrl.loadContent();
         }));
         it('should not display all fields', function() {
-          deferred.resolve(fullCases);
+          caseDeferred.resolve(fullCases);
+          sessionDeferred.resolve(sessionsMock['william.jobs']);
+          humanTaskDeferred.resolve({resource:{pagination:{total:1}}});
           scope.$apply();
           expect(scope.cases).toBeDefined();
           expect(scope.cases.length).toBe(4);
@@ -89,28 +107,36 @@
             expect(singleCase[scope.columns[1].name]).toBeFalsy();
             expect(singleCase[scope.columns[2].name]).toBeFalsy();
           }
+          /* jshint camelcase: false */
           expect(caseAPI.search).toHaveBeenCalledWith({
             p: 0,
-            c: defaultPageSize,
-            o: defaultSort + ' ASC',
-            d: defaultDeployedFields,
-            f: [],
-            n: defaultActiveCounterFields,
+            c: 1000,
+            d: [ 'titi',
+            'tata',
+            'toto' ],
+            o: 'id ASC',
+            f: [ 'user_id=30' ],
+            n: [ 'failed',
+            'ongoing' ],
             s: undefined
           });
+          /* jshint camelcase: true */
         });
       });
 
       describe('with correct columns', function() {
 
         beforeEach(inject(function($controller) {
-          casesCtrl = $controller('ActiveCaseListCtrl', {
+          casesCtrl = $controller('ActiveCaseListUserCtrl', {
             '$scope': scope,
+            'sessionAPI': sessionAPI,
             'caseAPI': caseAPI,
+            'humanTaskAPI': humanTaskAPI,
             'defaultPageSize': defaultPageSize,
             'defaultSort': defaultSort,
             'defaultDeployedFields': defaultDeployedFields,
             'defaultActiveCounterFields': defaultActiveCounterFields,
+            'tabName':undefined,
             'processId': undefined,
             'supervisorId': undefined,
             'caseStateFilter': 'error'
@@ -119,7 +145,10 @@
         }));
 
         it('should fill the scope cases', inject(function() {
-          deferred.resolve(fullCases);
+          var williamJobsSession = sessionsMock['william.jobs'];
+          caseDeferred.resolve(fullCases);
+          sessionDeferred.resolve(williamJobsSession);
+          humanTaskDeferred.resolve({resource:{pagination:{total:1}}});
           scope.$apply();
           expect(scope.cases).toBeDefined();
           expect(scope.cases.length).toBe(4);
@@ -129,90 +158,29 @@
               expect(singleCase[scope.columns[k].name]).toBeTruthy();
             }
           }
+          /* jshint camelcase: false */
           expect(caseAPI.search).toHaveBeenCalledWith({
             p: 0,
             c: defaultPageSize,
             o: defaultSort + ' ASC',
             d: defaultDeployedFields,
-            f: ['state=error'],
+            f: ['state=error','user_id='+williamJobsSession.user_id],
             n: defaultActiveCounterFields,
             s: undefined
           });
+          /* jshint camelcase: true */
         }));
-      });
-      describe('when supervisor', function() {
-        describe(' is set', function() {
-          beforeEach(inject(function($controller) {
-            $controller('ActiveCaseListCtrl', {
-              '$scope': scope,
-              'caseAPI': caseAPI,
-              'defaultPageSize': defaultPageSize,
-              'defaultSort': defaultSort,
-              'defaultDeployedFields': defaultDeployedFields,
-              'defaultActiveCounterFields': defaultActiveCounterFields,
-              'processId': undefined,
-              'supervisorId': 1,
-              'caseStateFilter': ''
-            });
-          }));
-
-          it('should fill ths filters with supervisor_id', inject(function() {
-            expect(scope.searchOptions.filters).toEqual(['supervisor_id=1']);
-          }));
-        });
-        describe(' is not set', function() {
-          beforeEach(inject(function($controller) {
-            $controller('ActiveCaseListCtrl', {
-              '$scope': scope,
-              'caseAPI': caseAPI,
-              'defaultPageSize': defaultPageSize,
-              'defaultSort': defaultSort,
-              'defaultDeployedFields': defaultDeployedFields,
-              'defaultActiveCounterFields': defaultActiveCounterFields,
-              'processId': undefined,
-              'supervisorId': undefined,
-              'caseStateFilter': ''
-            });
-          }));
-
-          it('should not fill ths filters with supervisor_id', inject(function() {
-            expect(scope.searchOptions.filters).toEqual([]);
-          }));
-        });
-
-        describe('$on event handler', function() {
-          beforeEach(inject(function($controller) {
-            spyOn(scope, '$on');
-            casesCtrl = $controller('ActiveCaseListCtrl', {
-              '$scope': scope,
-              'caseAPI': caseAPI,
-              'defaultPageSize': defaultPageSize,
-              'defaultSort': defaultSort,
-              'defaultDeployedFields': defaultDeployedFields,
-              'defaultActiveCounterFields': defaultActiveCounterFields,
-              'processId': undefined,
-              'supervisorId': 1,
-              'caseStateFilter': ''
-            });
-          }));
-          it('should be set', function() {
-            expect(scope.$on.calls.allArgs()).toEqual([
-              ['caselist:http-error', casesCtrl.handleHttpErrorEvent],
-              ['caselist:notify', casesCtrl.addAlertEventHandler],
-              ['caselist:search', casesCtrl.searchForCases]
-            ]);
-          });
-        });
-
       });
     });
 
     describe('handleHttpErrorEvent', function() {
       var mockedLocation = jasmine.createSpyObj('$location', ['url']);
       beforeEach(inject(function($controller) {
-        casesCtrl = $controller('ActiveCaseListCtrl', {
+        casesCtrl = $controller('ActiveCaseListUserCtrl', {
           '$scope': scope,
+          'sessionAPI': sessionAPI,
           'caseAPI': caseAPI,
+          'humanTaskAPI': humanTaskAPI,
           '$location': mockedLocation,
           'processId': undefined,
           'supervisorId': 1,
@@ -261,9 +229,11 @@
 
     describe('updateSortField', function() {
       beforeEach(inject(function($controller) {
-        casesCtrl = $controller('ActiveCaseListCtrl', {
+        casesCtrl = $controller('ActiveCaseListUserCtrl', {
           '$scope': scope,
+          'sessionAPI': sessionAPI,
           'caseAPI': caseAPI,
+          'humanTaskAPI': humanTaskAPI,
           'processId': undefined,
           'supervisorId': undefined,
           'caseStateFilter': ''
@@ -338,13 +308,13 @@
           };
         });
 
-        describe('without supervisorId', function() {
+        describe(' user', function() {
           beforeEach(inject(function($controller) {
-            casesCtrl = $controller('ActiveCaseListCtrl', {
+            casesCtrl = $controller('ActiveCaseListUserCtrl', {
               '$scope': scope,
               '$window': mockedWindow,
               'manageTopUrl': manageTopUrl,
-              'moreDetailToken': 'casemoredetailsadmin',
+              'moreDetailToken': 'casemoredetails',
               'processId': undefined,
               'supervisorId': undefined,
               'caseStateFilter': ''
@@ -367,8 +337,7 @@
                 id: 321
               }
             };
-            expect(casesCtrl.getLinkToCase(caseItem)).toEqual('/bonita/portal/homepage?tenant=1#?id=123&_p=casemoredetailsadmin&_pf=2');
-            expect(casesCtrl.getLinkToProcess(caseItem)).toEqual('/bonita/portal/homepage?tenant=1#?id=321&_p=processmoredetailsadmin&_pf=2');
+            expect(casesCtrl.getLinkToCase(caseItem)).toEqual('/bonita/portal/homepage?tenant=1#?id=123&_p=casemoredetails&_pf=2');
             caseItem = {
               id: '4568',
               processDefinitionId: {
@@ -376,97 +345,11 @@
               }
             };
             casesCtrl.getLinkToCase(caseItem);
-            casesCtrl.getLinkToProcess(caseItem);
-            expect(casesCtrl.getLinkToCase(caseItem)).toEqual('/bonita/portal/homepage?tenant=1#?id=4568&_p=casemoredetailsadmin&_pf=2');
-            expect(casesCtrl.getLinkToProcess(caseItem)).toEqual('/bonita/portal/homepage?tenant=1#?id=3987&_p=processmoredetailsadmin&_pf=2');
-            expect(manageTopUrl.getPath.calls.count()).toEqual(6);
-            expect(manageTopUrl.getSearch.calls.count()).toEqual(6);
-            expect(manageTopUrl.getCurrentProfile.calls.count()).toEqual(6);
-          });
-        });
-        describe('with supervisorId', function() {
-          beforeEach(inject(function($controller) {
-            casesCtrl = $controller('ActiveCaseListCtrl', {
-              '$scope': scope,
-              '$window': mockedWindow,
-              'manageTopUrl': manageTopUrl,
-              'moreDetailToken': 'casemoredetailsadmin',
-              'processId': undefined,
-              'supervisorId': 1,
-              'caseStateFilter': ''
-            });
-            manageTopUrl.getPath.calls.reset();
-            manageTopUrl.getSearch.calls.reset();
-            manageTopUrl.getCurrentProfile.calls.reset();
-          }));
-          it('should change top location hash to case detail', function() {
-
-            expect(casesCtrl.getLinkToCase()).toBeUndefined();
-          });
-
-          it('should change top location hash to case detail', function() {
-            manageTopUrl.getPath.and.returnValue('/bonita/portal/homepage');
-            manageTopUrl.getSearch.and.returnValue('?tenant=1');
-            manageTopUrl.getCurrentProfile.and.returnValue('_pf=2');
-            var caseItem = {
-              id: 123,
-              processDefinitionId: {
-                id: 321
-              }
-            };
-            expect(casesCtrl.getLinkToCase(caseItem)).toEqual('/bonita/portal/homepage?tenant=1#?id=123&_p=casemoredetailspm&_pf=2');
-            expect(casesCtrl.getLinkToProcess(caseItem)).toEqual('/bonita/portal/homepage?tenant=1#?id=321&_p=processmoredetailspm&_pf=2');
-            caseItem = {
-              id: '4568',
-              processDefinitionId: {
-                id: 78987
-              }
-            };
-            casesCtrl.getLinkToCase(caseItem);
-            casesCtrl.getLinkToProcess(caseItem);
-            expect(casesCtrl.getLinkToCase(caseItem)).toEqual('/bonita/portal/homepage?tenant=1#?id=4568&_p=casemoredetailspm&_pf=2');
-            expect(casesCtrl.getLinkToProcess(caseItem)).toEqual('/bonita/portal/homepage?tenant=1#?id=78987&_p=processmoredetailspm&_pf=2');
-            expect(manageTopUrl.getPath.calls.count()).toEqual(6);
-            expect(manageTopUrl.getSearch.calls.count()).toEqual(6);
-            expect(manageTopUrl.getCurrentProfile.calls.count()).toEqual(6);
-          });
-
-          it('should change top location hash to case detail', inject(function($controller) {
-            casesCtrl = $controller('ActiveCaseListCtrl', {
-              '$scope': scope,
-              '$window': mockedWindow,
-              'manageTopUrl': manageTopUrl,
-              'moreDetailToken': 'casemoredetails',
-              'processId': undefined,
-              'supervisorId': 1,
-              'caseStateFilter': ''
-            });
-
-            manageTopUrl.getPath.and.returnValue('/bonita/portal/homepage');
-            manageTopUrl.getSearch.and.returnValue('?tenant=1');
-            manageTopUrl.getCurrentProfile.and.returnValue('_pf=2');
-            var caseItem = {
-              id: 123,
-              processDefinitionId: {
-                id: 321
-              }
-            };
-            expect(casesCtrl.getLinkToCase(caseItem)).toEqual('/bonita/portal/homepage?tenant=1#?id=123&_p=casemoredetails&_pf=2');
-            expect(casesCtrl.getLinkToProcess(caseItem)).toEqual('/bonita/portal/homepage?tenant=1#?id=321&_p=processmoredetailspm&_pf=2');
-            caseItem = {
-              id: '4568',
-              processDefinitionId: {
-                id: 54545
-              }
-            };
-            casesCtrl.getLinkToCase(caseItem);
-            casesCtrl.getLinkToProcess(caseItem);
             expect(casesCtrl.getLinkToCase(caseItem)).toEqual('/bonita/portal/homepage?tenant=1#?id=4568&_p=casemoredetails&_pf=2');
-            expect(casesCtrl.getLinkToProcess(caseItem)).toEqual('/bonita/portal/homepage?tenant=1#?id=54545&_p=processmoredetailspm&_pf=2');
-            expect(manageTopUrl.getPath.calls.count()).toEqual(6);
-            expect(manageTopUrl.getSearch.calls.count()).toEqual(6);
-            expect(manageTopUrl.getCurrentProfile.calls.count()).toEqual(6);
-          }));
+            expect(manageTopUrl.getPath.calls.count()).toEqual(3);
+            expect(manageTopUrl.getSearch.calls.count()).toEqual(3);
+            expect(manageTopUrl.getCurrentProfile.calls.count()).toEqual(3);
+          });
         });
       });
 
@@ -478,9 +361,12 @@
         var defaultActiveCounterFields = ['failed', 'ongoing'];
 
         beforeEach(inject(function($controller) {
-          casesCtrl = $controller('ActiveCaseListCtrl', {
+          casesCtrl = $controller('ActiveCaseListUserCtrl', {
             '$scope': scope,
+
+            'sessionAPI': sessionAPI,
             'caseAPI': caseAPI,
+            'humanTaskAPI': humanTaskAPI,
             'defaultPageSize': defaultPageSize,
             'defaultSort': defaultSort,
             'defaultDeployedFields': defaultDeployedFields,
@@ -513,7 +399,8 @@
           var error = {
             status: 401
           };
-          deferred.reject(error);
+          caseDeferred.reject(error);
+          sessionDeferred.resolve(sessionsMock['william.jobs']);
           scope.$apply();
           expect(scope.pagination.total).toBe(0);
           expect(scope.currentFirstResultIndex).toBe(0);
@@ -523,7 +410,8 @@
           ]);
         });
         it('should call next Page without sort', function() {
-          deferred.resolve(fullCases);
+          caseDeferred.resolve(fullCases);
+          sessionDeferred.resolve(sessionsMock['william.jobs']);
           scope.$apply();
           expect(scope.currentFirstResultIndex).toBe(1);
           expect(scope.currentLastResultIndex).toBe(2);
@@ -542,7 +430,7 @@
               c: defaultPageSize,
               d: defaultDeployedFields,
               o: defaultSort + ' ASC',
-              f: [],
+              f: [ 'user_id=30' ],
               n: defaultActiveCounterFields,
               s: undefined
             }],
@@ -551,13 +439,14 @@
               c: defaultPageSize,
               d: defaultDeployedFields,
               o: defaultSort + ' ASC',
-              f: [],
+              f: [ 'user_id=30' ],
               n: defaultActiveCounterFields,
               s: undefined
             }],
           ]);
         });
         it('should call search twice on second page with second call faster than the first, the second result should be displayed', function() {
+          sessionDeferred.resolve(sessionsMock['william.jobs']);
           scope.$apply();
           scope.pagination.currentPage++;
           var secondDeferred = q.defer();
@@ -574,7 +463,7 @@
           scope.$apply();
           results = cases.slice(0, 2);
           results.pagination = fullCases.resource.pagination;
-          deferred.resolve({
+          caseDeferred.resolve({
             resource: results
           });
           scope.$apply();
@@ -585,6 +474,7 @@
           expect(scope.currentLastResultIndex).toBe(4);
         });
         it('should call search twice with second call faster than the first, the second result should be displayed', function() {
+          sessionDeferred.resolve(sessionsMock['william.jobs']);
           scope.$apply();
           var secondDeferred = q.defer();
           caseAPI.search.and.returnValue({
@@ -596,6 +486,7 @@
           results.pagination = {
             total: 20
           };
+          sessionDeferred.resolve(sessionsMock['william.jobs']);
           secondDeferred.resolve({
             resource: results
           });
@@ -604,9 +495,10 @@
           results.pagination = {
             total: 6
           };
-          deferred.resolve({
+          caseDeferred.resolve({
             resource: results
           });
+
           scope.$apply();
           expect(scope.cases[0].id).toBe('2');
           expect(scope.cases[1].id).toBe('4');
@@ -616,7 +508,8 @@
           expect(scope.pagination.total).toBe(20);
         });
         it('should call next Page on current sort', function() {
-          deferred.resolve(fullCases);
+          caseDeferred.resolve(fullCases);
+          sessionDeferred.resolve(sessionsMock['william.jobs']);
           scope.$apply();
           scope.searchOptions.searchSort = 'name DESC';
           scope.$apply();
@@ -647,7 +540,7 @@
               c: defaultPageSize,
               o: defaultSort + ' ASC',
               d: defaultDeployedFields,
-              f: [],
+              f: [ 'user_id=30' ],
               n: defaultActiveCounterFields,
               s: undefined
             }],
@@ -656,7 +549,7 @@
               c: defaultPageSize,
               o: 'name DESC',
               d: defaultDeployedFields,
-              f: [],
+              f: [ 'user_id=30' ],
               n: defaultActiveCounterFields,
               s: undefined
             }],
@@ -665,7 +558,7 @@
               c: defaultPageSize,
               o: 'name DESC',
               d: defaultDeployedFields,
-              f: [],
+              f: [ 'user_id=30' ],
               n: defaultActiveCounterFields,
               s: undefined
             }],
@@ -674,7 +567,7 @@
               c: defaultPageSize,
               o: 'name DESC',
               d: defaultDeployedFields,
-              f: [],
+              f: [ 'user_id=30' ],
               n: defaultActiveCounterFields,
               s: undefined
             }],
@@ -683,7 +576,7 @@
               c: defaultPageSize,
               o: 'version ASC',
               d: defaultDeployedFields,
-              f: [],
+              f: [ 'user_id=30' ],
               n: defaultActiveCounterFields,
               s: undefined
             }]
@@ -700,9 +593,11 @@
           var defaultActiveCounterFields = ['failed', 'ongoing'];
 
           beforeEach(inject(function($controller) {
-            casesCtrl = $controller('ActiveCaseListCtrl', {
+            casesCtrl = $controller('ActiveCaseListUserCtrl', {
               '$scope': scope,
+              'sessionAPI': sessionAPI,
               'caseAPI': caseAPI,
+              'humanTaskAPI': humanTaskAPI,
               'defaultPageSize': defaultPageSize,
               'defaultSort': defaultSort,
               'defaultDeployedFields': defaultDeployedFields,
@@ -728,7 +623,8 @@
             casesCtrl.loadContent();
           }));
           it('should call default sort on empty tableState', function() {
-            deferred.resolve(fullCases);
+            caseDeferred.resolve(fullCases);
+            sessionDeferred.resolve(sessionsMock['william.jobs']);
             scope.$apply();
             expect(anchorScroll).toHaveBeenCalled();
 
@@ -738,7 +634,7 @@
                 c: defaultPageSize,
                 o: defaultSort + ' ASC',
                 d: defaultDeployedFields,
-                f: [],
+                f: [ 'user_id=30' ],
                 n: defaultActiveCounterFields,
                 s: undefined
               }]
@@ -746,7 +642,8 @@
             expect(anchorScroll).toHaveBeenCalled();
           });
           it('should call search on application name sort desc', function() {
-            deferred.resolve(fullCases);
+            sessionDeferred.resolve(sessionsMock['william.jobs']);
+            caseDeferred.resolve(fullCases);
             scope.$apply();
             scope.searchOptions.searchSort = 'name DESC';
             scope.$apply();
@@ -763,7 +660,7 @@
                 c: defaultPageSize,
                 o: 'id ASC',
                 d: defaultDeployedFields,
-                f: [],
+                f: [ 'user_id=30' ],
                 n: defaultActiveCounterFields,
                 s: undefined
               }],
@@ -772,7 +669,7 @@
                 c: defaultPageSize,
                 o: 'name DESC',
                 d: defaultDeployedFields,
-                f: [],
+                f: [ 'user_id=30' ],
                 n: defaultActiveCounterFields,
                 s: undefined
               }],
@@ -781,7 +678,7 @@
                 c: defaultPageSize,
                 o: 'name ASC',
                 d: defaultDeployedFields,
-                f: [],
+                f: [ 'user_id=30' ],
                 n: defaultActiveCounterFields,
                 s: undefined
               }],
@@ -790,7 +687,7 @@
                 c: defaultPageSize,
                 o: 'version DESC',
                 d: defaultDeployedFields,
-                f: [],
+                f: [ 'user_id=30' ],
                 n: defaultActiveCounterFields,
                 s: undefined
               }]
@@ -807,7 +704,7 @@
               url: function() {}
             };
             spyOn(location, 'url').and.callThrough();
-            casesCtrl = $controller('ActiveCaseListCtrl', {
+            casesCtrl = $controller('ActiveCaseListUserCtrl', {
               '$scope': scope,
               '$location': location,
               'processId': undefined,
@@ -835,7 +732,7 @@
               }
             };
             var growl = jasmine.createSpyObj('growl', ['success', 'error', 'info']);
-            casesCtrl = $controller('ActiveCaseListCtrl', {
+            casesCtrl = $controller('ActiveCaseListUserCtrl', {
               '$scope': scope,
               'growl': growl,
               'processId': undefined,
@@ -861,7 +758,7 @@
 
     describe('filter column ', function() {
       beforeEach(inject(function($controller) {
-        casesCtrl = $controller('ActiveCaseListCtrl', {
+        casesCtrl = $controller('ActiveCaseListUserCtrl', {
           '$scope': scope,
           'processId': undefined,
           'supervisorId': undefined,
@@ -884,7 +781,7 @@
 
     describe('select nbItems in page ', function() {
       beforeEach(inject(function($controller) {
-        casesCtrl = $controller('ActiveCaseListCtrl', {
+        casesCtrl = $controller('ActiveCaseListUserCtrl', {
           '$scope': scope,
           'processId': undefined,
           'supervisorId': undefined,
@@ -911,7 +808,7 @@
     describe('addAlertEventHandler', function() {
       var growl = jasmine.createSpyObj('growl', ['success', 'error', 'info']);
       beforeEach(inject(function($controller) {
-        casesCtrl = $controller('ActiveCaseListCtrl', {
+        casesCtrl = $controller('ActiveCaseListUserCtrl', {
           '$scope': scope,
           'growl': growl,
           'processId': undefined,
@@ -975,7 +872,7 @@
 
     describe('reinitCases', function() {
       it('should remove sort and set page to 1', inject(function($controller) {
-        casesCtrl = $controller('ActiveCaseListCtrl', {
+        casesCtrl = $controller('ActiveCaseListUserCtrl', {
           '$scope': scope,
           'processId': undefined,
           'supervisorId': undefined,
@@ -994,8 +891,9 @@
       beforeEach(inject(function($controller, $q) {
         var deferred = $q.defer();
         var localPromise = deferred.promise;
+        sessionDeferred.resolve(sessionsMock['william.jobs']);
         deferred.resolve();
-        casesCtrl = $controller('ActiveCaseListCtrl', {
+        casesCtrl = $controller('ActiveCaseListUserCtrl', {
           '$scope': scope,
           'store': {
             load: function() {
@@ -1004,6 +902,7 @@
               };
             }
           },
+          'sessionAPI': sessionAPI,
           'caseAPI': {
             search: function() {
               return {
@@ -1064,7 +963,7 @@
     });
     describe('onDropComplete', function() {
       beforeEach(inject(function($controller) {
-        casesCtrl = $controller('ActiveCaseListCtrl', {
+        casesCtrl = $controller('ActiveCaseListUserCtrl', {
           '$scope': scope,
           'processId': undefined,
           'supervisorId': undefined,
@@ -1099,3 +998,4 @@
     });
   });
 })();
+
