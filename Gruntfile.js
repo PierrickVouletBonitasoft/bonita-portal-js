@@ -17,7 +17,60 @@ module.exports = function (grunt) {
 
   var licenseTemplate = grunt.file.read('license-tpl.txt');
   
-  var ext = require('node-pom-parser');
+  var ext = require('pom-parser');
+
+  var pomProject={};
+
+  var pomObj;
+
+  var pomResp;
+
+  ext.parse({ filePath: 'pom.xml', explicitCharkey: true }, function(err, pomResp){
+    if (err) {
+      console.log("ERROR: " + err);
+      process.exit(1);
+    };
+
+    console.log("Pom Pom Pom :" + JSON.stringify(pomResp.pomObject.project));
+    return pomResp;
+  });
+
+  console.log("pomRespObj: " + JSON.stringify(pomResp));
+
+  function testPom(pomObj) { ext.parse({ filePath: 'pom.xml' }, function(err, pomResponse, pomObj)
+      {
+        console.log("VERSION pomResponse: " + JSON.stringify(pomResponse.pomObject.project.version));
+        pomObj = pomResponse.pomObject.project;
+        return pomObj;
+      }
+    );
+  };
+
+  var versiPom = testPom(pomObj);
+  console.log("VERSION pomProject: " + JSON.stringify(pomProject.version));
+  console.log("versiPom: " + JSON.stringify(versiPom));
+  console.log("pomObj: " + JSON.stringify(pomObj));
+
+
+  //console.log("PROJECT VERSION: "+ testPom.version);
+  /*
+      if (err) {
+        console.log("ERROR: " + err);
+        process.exit(1);
+      };
+
+
+       pom2 =  pomResponse.pomObject;
+       //console.log("OBJECT: " + JSON.stringify(pom2));
+
+      return pom2;
+      // The original pom xml that was loaded is provided.
+      //console.log("XML: " + pomResponse.pomXml);
+      // The parsed pom pbject.
+      //console.log("OBJECT: " + JSON.stringify(pomResponse.pomObject));
+    });*/
+
+
 
   // Define the configuration for all the tasks
   grunt.initConfig({
@@ -31,7 +84,33 @@ module.exports = function (grunt) {
       build: 'build'
     },
     
-    pom: ext.parsePom({ filePath: 'pom.xml' }),
+    pom : testPom(),
+
+    //function() {return ext.parse({ filePath: 'pom.xml' },function (err, response){return response.pomObject.project;});},
+    /*function() {
+        var pomR
+        ext.parse({ filePath: 'pom.xml' },
+        function(err, responsePom) {
+          if (err) {
+            console.log("ERROR: " + err);
+            process.exit(1);
+          }
+
+          //console.log("pomObject: " + JSON.stringify(response.pomObject));
+          console.log("pomObject: " + responsePom.pomObject.project.version);
+
+          pomR = responsePom.pomObject.project;
+
+          console.log("pomR: " + pomR.version);
+
+          return pomR;
+        }
+      );
+
+      //console.log("pomRRRR: " + pomR.version);
+      //console.log("response: " + response.pomObject.project.version);
+      //return response.pomObject.project;
+    },*/
 
     // Watches files for changes and runs tasks based on the changed files
     watch: {
