@@ -1,14 +1,30 @@
+/** Copyright (C) 2015 Bonitasoft S.A.
+ * BonitaSoft, 31 rue Gustave Eiffel - 38000 Grenoble
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2.0 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 (function() {
   'use strict';
-  angular.module('org.bonita.features.admin.cases.list.filters', [
-    'org.bonita.common.resources',
-    'org.bonita.features.admin.cases.list.values',
+  angular.module('org.bonitasoft.features.admin.cases.list.filters', [
+    'org.bonitasoft.common.resources',
+    'org.bonitasoft.features.admin.cases.list.values',
     'gettext',
     'ui.bootstrap',
     'ui.router',
-    'org.bonita.common.resources.store'
+    'org.bonitasoft.common.resources.store'
   ])
-  .controller('ActiveCaseFilterController', ['$scope', 'store', 'processAPI', 'defaultFilters', 'caseStatesValues', 'activedTabName', CaseFilterController])
+  .controller('ActiveCaseFilterController', ['$scope', 'store', 'processAPI', 'defaultFilters', 'caseStatesValues', '$stateParams', CaseFilterController])
   .directive('activeCaseFilters', function () {
     return {
       restrict: 'E',
@@ -18,7 +34,7 @@
       controllerAs : 'filterCtrl'
     };
   })
-  .controller('ArchivedCaseFilterController', ['$scope', 'store', 'processAPI', 'defaultFilters', 'caseStatesValues', CaseFilterController])
+  .controller('ArchivedCaseFilterController', ['$scope', 'store', 'processAPI', 'defaultFilters', 'caseStatesValues', '$stateParams', CaseFilterController])
   .directive('archivedCaseFilters', function() {
     return {
       restrict: 'E',
@@ -41,12 +57,15 @@
    * @requires caseStatesValues
    */
   /* jshint -W003 */
-  function CaseFilterController($scope, store, processAPI, defaultFilters, caseStatesValues) {
+  function CaseFilterController($scope, store, processAPI, defaultFilters, caseStatesValues, $stateParams) {
     $scope.selectedFilters.selectedApp = defaultFilters.appName;
     $scope.selectedFilters.selectedVersion = defaultFilters.appVersion;
     $scope.selectedFilters.selectedStatus = defaultFilters.caseStatus;
     $scope.defaultFilters = defaultFilters;
     $scope.caseStatesValues = caseStatesValues;
+    if(angular.isDefined($stateParams.caseStateFilter) && !!$stateParams.caseStateFilter && angular.isDefined($scope.caseStatesValues[$stateParams.caseStateFilter])){
+      $scope.selectedFilters.selectedStatus = $stateParams.caseStateFilter;
+    }
     $scope.caseStatesValues[defaultFilters.caseStatus] = defaultFilters.caseStatus;
     $scope.apps = [];
     $scope.versions = [];

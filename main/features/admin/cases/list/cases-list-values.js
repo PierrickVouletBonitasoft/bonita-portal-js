@@ -1,3 +1,19 @@
+/** Copyright (C) 2015 Bonitasoft S.A.
+ * BonitaSoft, 31 rue Gustave Eiffel - 38000 Grenoble
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2.0 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 (function() {
   'use strict';
   /**
@@ -8,36 +24,29 @@
    * set values to uses by the different case list components
    */
 
-  angular.module('org.bonita.features.admin.cases.list.values', [])
+  angular.module('org.bonitasoft.features.admin.cases.list.values', [])
     .value('casesColumns', [{
       name: 'ID',
-      path: ['id'],
-      selected: true
+      path: ['id']
     }, {
       name: 'Process name',
-      path: ['processDefinitionId', 'name'],
-      selected: true
+      path: ['processDefinitionId', 'name']
     }, {
       name: 'Version',
-      path: ['processDefinitionId', 'version'],
-      selected: true
+      path: ['processDefinitionId', 'version']
     }, {
       name: 'Start date',
-      path: ['start'],
-      selected: true
+      path: ['start']
     }, {
       name: 'Started by',
       path: ['started_by', 'userName'],
-      selected: true,
       defaultValue : 'System'
     }, {
       name: 'Failed Flow Nodes',
-      path: ['failedFlowNodes'],
-      selected: true
+      path: ['failedFlowNodes']
     }, {
       name: 'Pending Flow Nodes',
-      path: ['activeFlowNodes'],
-      selected: true
+      path: ['activeFlowNodes']
     }])
     .value('allCaseStatesValues', {
       started: 'Started',
@@ -65,32 +74,25 @@
     .value('archivedCasesColumns', [{
       name: 'ID',
       path: ['sourceObjectId'],
-      selected: true
     }, {
       name: 'Process name',
       path: ['processDefinitionId', 'name'],
-      selected: true
     }, {
       name: 'Version',
       path: ['processDefinitionId', 'version'],
-      selected: true
     }, {
       name: 'Start date',
       path: ['start'],
-      selected: true
     }, {
       name: 'Started by',
       path: ['started_by', 'userName'],
-      selected: true,
       defaultValue : 'System'
     }, {
       name: 'End date',
       path: ['end_date'],
-      selected: true
     }, {
       name: 'State',
       path: ['state'],
-      selected: true
     }])
     .
     value('archivedCaseStatesValues', {

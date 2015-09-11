@@ -1,3 +1,19 @@
+/** Copyright (C) 2015 Bonitasoft S.A.
+ * BonitaSoft, 31 rue Gustave Eiffel - 38000 Grenoble
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2.0 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 /* global describe  */
 (function () {
   'use strict';
@@ -5,7 +21,7 @@
 
     var scope, caseDeleteCtrl;
 
-    beforeEach(module('org.bonita.features.admin.cases.list.delete'));
+    beforeEach(module('org.bonitasoft.features.admin.cases.list.delete'));
 
     beforeEach(inject(function ($rootScope) {
       scope = $rootScope.$new();
@@ -153,7 +169,7 @@
         scope.$apply();
         expect(caseAPI.delete).toHaveBeenCalled();
         expect(caseAPI.delete.calls.allArgs()).toEqual([[{id: '1'}], [{id: '324'}]]);
-        expect(scope.$emit.calls.allArgs()).toEqual([['caselist:notify', {type: 'success', status: '2 cases deleted successfully'}], ['caselist:search']]);
+        expect(scope.$emit.calls.allArgs()).toEqual([['caselist:notify', {type: 'success', status: '2 cases have been deleted'}], ['caselist:search']]);
         expect(scope.pagination.currentPage).toBe(1);
       });
 
@@ -213,7 +229,7 @@
         expect(caseAPI.delete.calls.allArgs()).toEqual([[{id: '1'}], [{id: '324'}], [{id: '6548'}], [{id: '1324'}]]);
         expect(scope.$emit.calls.allArgs()).toEqual([
           ['caselist:http-error', { status : 500, statusText : 'Internal Server Error', data : { resource : 'bpm/case', message : 'impossible to delete' } }],
-          ['caselist:notify', {type: 'success', status: '3 cases deleted successfully'}],
+          ['caselist:notify', {type: 'success', status: '3 cases have been deleted'}],
           ['caselist:search']
         ]);
         expect(scope.pagination.currentPage).toBe(1);
@@ -239,7 +255,7 @@
         expect(scope.$emit.calls.allArgs()).toEqual([
           ['caselist:http-error', { status : 500, statusText : 'Internal Server Error', data : { resource : 'bpm/case', message : 'impossible to delete' } }],
           ['caselist:http-error', { status : 500, statusText : 'Internal Server Error', data : { resource : 'bpm/case', message : 'impossible to delete' } }],
-          ['caselist:notify', {type: 'success', status: '0 cases deleted successfully'}],
+          ['caselist:notify', {type: 'success', status: '0 cases have been deleted'}],
           ['caselist:search']
         ]);
         expect(scope.pagination.currentPage).toBe(1);

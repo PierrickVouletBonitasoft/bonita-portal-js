@@ -1,25 +1,35 @@
+/** Copyright (C) 2015 Bonitasoft S.A.
+ * BonitaSoft, 31 rue Gustave Eiffel - 38000 Grenoble
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2.0 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 /* jshint sub:true */
 (function() {
   'use strict';
 
-  angular.module('org.bonita.features.admin.cases.list', [
+  angular.module('org.bonitasoft.features.admin.cases.list', [
     'ui.router',
-    'org.bonita.features.admin.cases.list.table',
+    'org.bonitasoft.features.admin.cases.list.table',
     'ui.bootstrap',
     'gettext',
-    'org.bonita.services.topurl',
-    'org.bonita.features.admin.cases.list.values',
-    'org.bonita.common.directives.bonitaHref'
+    'org.bonitasoft.services.topurl',
+    'org.bonitasoft.features.admin.cases.list.values',
+    'org.bonitasoft.common.directives.bonitaHref'
   ])
-    .config(['$stateProvider', '$urlRouterProvider',
-      function($stateProvider, $urlRouterProvider) {
-        $urlRouterProvider.rule(function ($injector, $location) {
-          if($location.path().indexOf('/pm')===0){
-            return $location.url().replace(/^\/pm/, '/admin');
-          }
-        });
+    .config(function($stateProvider) {
         $stateProvider.state('bonita.cases', {
-          url: '/admin/cases/list?processId&supervisor_id',
+          url: '/admin/cases/list?processId&supervisor_id&caseStateFilter',
           templateUrl: 'features/admin/cases/list/cases.html',
           abstract: true,
           controller: 'CaseCtrl',
@@ -48,6 +58,11 @@
               function($stateParams){
                 return $stateParams.processId;
               }
+            ],
+            caseStateFilter: ['$stateParams',
+              function($stateParams){
+                return $stateParams.caseStateFilter;
+              }
             ]
           }
         }).state('bonita.cases.archived', {
@@ -74,11 +89,16 @@
               function($stateParams){
                 return $stateParams.processId;
               }
+            ],
+            caseStateFilter: ['$stateParams',
+              function($stateParams){
+                return $stateParams.caseStateFilter;
+              }
             ]
           }
         });
       }
-    ])
+    )
     .controller('CaseCtrl', ['$scope', '$state', 'manageTopUrl',
       function($scope, $state, manageTopUrl) {
         //ui-sref-active seems to bug when the processId is passed

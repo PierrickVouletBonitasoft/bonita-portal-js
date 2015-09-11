@@ -14,13 +14,10 @@ module.exports = function (grunt) {
 
   // Time how long tasks take. Can help when optimizing build times
   require('time-grunt')(grunt);
-  grunt.loadNpmTasks('grunt-connect-proxy');
-  grunt.loadNpmTasks('grunt-connect-rewrite');
-  grunt.loadNpmTasks('grunt-angular-gettext');
-  grunt.loadNpmTasks('grunt-ngdocs');
-  grunt.loadNpmTasks('grunt-protractor-runner');
-  grunt.loadNpmTasks('grunt-lineending');
-  grunt.loadNpmTasks('grunt-ng-annotate');
+
+  var licenseTemplate = grunt.file.read('license-tpl.txt');
+  
+  var ext = require('node-pom-parser');
 
   // Define the configuration for all the tasks
   grunt.initConfig({
@@ -29,15 +26,18 @@ module.exports = function (grunt) {
     portaljs: {
       // configurable paths
       app: 'main',
+      test: 'test',
       dist: 'dist',
       build: 'build'
     },
+    
+    pom: ext.parsePom({ filePath: 'pom.xml' }),
 
     // Watches files for changes and runs tasks based on the changed files
     watch: {
       bower: {
         files: ['bower.json'],
-        tasks: ['bowerInstall']
+        tasks: ['wiredep']
       },
       js: {
         files: ['<%= portaljs.app %>/*.js', '<%= portaljs.app %>/features/**/*.js', '<%= portaljs.app %>/commons/**/*.js', '<%= portaljs.app %>/assets/**/*.js'],
@@ -72,6 +72,44 @@ module.exports = function (grunt) {
       }
     },
 
+    esteWatch: {
+      options: {
+        dirs: [
+          '<%= portaljs.app %>/',//js
+          '<%= portaljs.app %>/{features, commons, assets}/**/',//js
+          '<%= portaljs.app %>/test/{spec,e2e}/**/',//js test & e2e
+          '<%= portaljs.app %>/styles/**/',//styles
+          '<%= portaljs.app %>/styles/**/',
+          ],
+        livereload:{
+          enabled: true,
+          port:'<%= connect.options.livereload %>',
+          extensions:['js','css','html','json'],
+          key: null, // provide a filepath or Buffer for `key` and `cert` to enable SSL.
+          cert: null
+        }
+      },
+      bower: function() {
+        return ['wiredep'];
+      },
+      js: function(filepath) {
+        grunt.config(['esteJs','app'], filepath);
+        return ['newer:jshint:all', 'ngdocs:all'];
+      },
+      jsTest: function(){
+        return ['newer:jshint:test', 'karma'];
+      },
+      e2eTest: function(){
+        return ['protractor:e2e'];
+      },
+      styles: function(){
+        return ['<%= portaljs.app %>/styles/{,*/}*.css'];
+      }
+    },
+
+
+
+
     // The actual grunt server settings
     connect: {
       options: {
@@ -85,29 +123,36 @@ module.exports = function (grunt) {
         ]
       },
       server: {
-          proxies: (function () {
-              function forward(context) {
-                  return {
-                      context: context,
-                      host: 'localhost',
-                      port: 8080,
-                      https: false,
-                      changeOrigin: false,
-                      xforward: false
-                  };
-              }
+        proxies: (function () {
+          function forward(context) {
+            return {
+              context: context,
+              host: 'localhost',
+              port: 8080,
+              https: false,
+              changeOrigin: false,
+              xforward: false
+            };
+          }
 
-              return [
+          return [
                   forward('/bonita/apps'),
                   forward('/bonita/API'),
                   forward('/bonita/portal/')
               ];
-          })()
+        })()
       },
       rules: [
         // prefix web appliation
-        { from: '^/bonita/portaljs(.*)$', to: '/$1' },
-        { from: '^(?!/bonita/portaljs)(.*)$', to: '/bonita/portaljs$1', redirect: 'temporary' }
+        {
+          from: '^/bonita/portaljs(.*)$',
+          to: '/$1'
+        },
+        {
+          from: '^(?!/bonita/portaljs)(.*)$',
+          to: '/bonita/portaljs$1',
+          redirect: 'temporary'
+        }
       ],
       livereload: {
         options: {
@@ -153,22 +198,22 @@ module.exports = function (grunt) {
           port: 9002,
           base: '<%= portaljs.dist %>',
           middleware: function (connect, options) {
-              if (!Array.isArray(options.base)) {
-               options.base = [options.base];
-              }
-              // Setup the proxy
-              var middlewares = [
+            if (!Array.isArray(options.base)) {
+              options.base = [options.base];
+            }
+            // Setup the proxy
+            var middlewares = [
                   require('./test/dev/server-mock.js'),
                   require('grunt-connect-proxy/lib/utils').proxyRequest,
                   require('grunt-connect-rewrite/lib/utils').rewriteRequest];
-              // Serve static files.
-              options.base.forEach(function (base) {
-                  middlewares.push(connect.static(base));
-              });
-                   // Make directory browse-able.
-              var directory = options.directory || options.base[options.base.length - 1];
-              middlewares.push(connect.directory(directory));
-                   return middlewares;
+            // Serve static files.
+            options.base.forEach(function (base) {
+              middlewares.push(connect.static(base));
+            });
+            // Make directory browse-able.
+            var directory = options.directory || options.base[options.base.length - 1];
+            middlewares.push(connect.directory(directory));
+            return middlewares;
           }
         }
       }
@@ -205,7 +250,17 @@ module.exports = function (grunt) {
           }
         ]
       },
-      server: '.tmp'
+      server: '.tmp',
+      test: {
+        files: [
+          {
+            src: [
+              'coverage',
+              'sonar'
+            ]
+          }
+        ]
+      }
     },
 
     // Add vendor prefixed styles
@@ -225,11 +280,49 @@ module.exports = function (grunt) {
       }
     },
 
-    // Automatically inject Bower components into the app
-    bowerInstall: {
-      'community': {
+    wiredep: {
+      'karma': {
+        devDependencies: true,
+        src: ['karma.conf.js'],
+        fileTypes: {
+          js: {
+            block: /(([\s\t]*)\/\/\s*bower:*(\S*))(\n|\r|.)*(\/\/\s*endbower)/gi,
+            detect: {
+              js: /('.*\.js')/gi
+            },
+            replace: {
+              js: '\'{{filePath}}\','
+            }
+          }
+        }
+      },
+      'e2e': {
         src: ['<%= portaljs.app %>/index.html'],
-        ignorePath: '<%= portaljs.app %>/'
+        ignorePath: '<%= portaljs.app %>/',
+
+        options: {
+          'overrides': {
+            'bootstrap': {
+              'main': [
+                "dist/css/bootstrap.css",
+                "dist/fonts/glyphicons-halflings-regular.eot",
+                "dist/fonts/glyphicons-halflings-regular.svg",
+                "dist/fonts/glyphicons-halflings-regular.ttf",
+                "dist/fonts/glyphicons-halflings-regular.woff"
+              ]
+            }
+          }
+        }
+      },
+      'build': {
+        src: ['<%= portaljs.app %>/index.html'],
+        ignorePath: '<%= portaljs.app %>/',
+
+        options: {
+          'overrides': {
+            'bootstrap': {'main': []}
+          }
+        }
       }
     },
 
@@ -258,6 +351,29 @@ module.exports = function (grunt) {
             '<%= portaljs.dist %>/styles/{,*/}*.css'
           ]
         }
+      }
+    },
+
+    //ensure locals CSS files are not included for packaging other bonita global theming will fail
+    taskHelper: {
+      useminPrepare: {
+        options: {
+          handlerByFileSrc: function (src) {
+            var regexp = /<link rel="stylesheet" href="(((styles)|(common)|(features))\/.*css)">/g;
+            var indexContent = grunt.file.read(src, {
+              encoding: 'utf-8'
+            });
+            var result;
+            if ((result = regexp.exec(indexContent))) {
+              var msg = result[1] + '\n';
+              while ((result = regexp.exec(indexContent)) !== null) {
+                msg += result[1] + '\n';
+              }
+              throw new Error('It seems that you have local CSS files should not be packaged here but to be added in bonita-web/looknfeel : \n' + msg);
+            }
+          }
+        },
+        src: '<%= useminPrepare.html %>'
       }
     },
 
@@ -302,7 +418,9 @@ module.exports = function (grunt) {
           collapseWhitespace: true,
           collapseBooleanAttributes: true,
           removeCommentsFromCDATA: true,
-          removeOptionalTags: true
+          removeOptionalTags: false,
+          caseSensitive: true,
+          keepClosingSlash: true
         },
         files: [
           {
@@ -394,6 +512,36 @@ module.exports = function (grunt) {
         singleRun: true
       }
     },
+
+    karmaSonar: {
+      options: {
+        dryRun: true,
+        excludedProperties: ['sonar.exclusions'],
+        defaultOutputDir: 'sonar',
+        runnerProperties: {
+          'sonar.exclusions': 'src/assets/**',
+          'sonar.coverage.exclusions': 'src/assets/**'
+        }
+      },
+      unittests: {
+        project: {
+          key: 'bonita-portal-js',
+          name: 'Bonita Portal JS',
+          version: '<%= pom.version %>'
+        },
+        paths: [
+          {
+            src: '<%= portaljs.app %>',
+            test: '<%= portaljs.test %>',
+            reports: {
+              unit: '<%= portaljs.test %>/TESTS-xunit.xml',
+              coverage: 'coverage/lcov.info'
+            }
+          }
+        ]
+      }
+    },
+    
     protractor: {
       options: {
         configFile: 'protractor.conf.js', // Default config file
@@ -408,14 +556,14 @@ module.exports = function (grunt) {
         options: {
           //configFile: "e2e.conf.js", // Target-specific config file
           args: {
-            //suite : 'arch-case-list'
+            // suite: 'process-details-information'
           } // Target-specific arguments
         }
       }
     },
 
 
-      /* jshint camelcase: false */
+    /* jshint camelcase: false */
     nggettext_extract: {
       pot: {
         files: {
@@ -442,6 +590,27 @@ module.exports = function (grunt) {
           'main/index.html': ['main/index.html']
         }
       }
+    },
+    usebanner: {
+      license: {
+        options: {
+          position: 'top',
+          linebreak: true,
+          process: function ( filepath ) {
+            return grunt.template.process(
+              licenseTemplate , {
+                data: {
+                  year: new Date().getFullYear()
+                }
+              }
+            );
+          },
+          pattern: /^((?!\/\*\* Copyright).)+.*/gi
+        },
+        files: {
+          src: [ 'main/common/**/*.js', 'main/features/**/*.js', 'test/**/*.js']
+        }
+      }
     }
   });
 
@@ -452,7 +621,7 @@ module.exports = function (grunt) {
 
     grunt.task.run([
       'clean:server',
-      'bowerInstall',
+      'wiredep:build',
       'injector',
       'lineending',
       'concurrent:server',
@@ -464,45 +633,73 @@ module.exports = function (grunt) {
     ]);
   });
 
+  grunt.registerTask('esteServe', function (target) {
+    if (target === 'dist') {
+      return grunt.task.run(['build', 'connect:dist:keepalive']);
+    }
+
+    grunt.task.run([
+      'clean:server',
+      'wiredep:build',
+      'injector',
+      'lineending',
+      'concurrent:server',
+      'configureRewriteRules',
+      'configureProxies:server',
+      'autoprefixer',
+      'connect:livereload',
+      'esteWatch'
+    ]);
+  });
+
   grunt.registerTask('test', [
     'clean:server',
+    'clean:test',
     'concurrent:test',
     'autoprefixer',
     'connect:test',
-    'karma'
+    'karma',
+    'karmaSonar'
   ]);
 
   grunt.registerTask('buildE2e', [
-      'build',
-      'clean:server',
-      'concurrent:test',
-      'autoprefixer',
-      'connect:dist',
-      'karma',
-      'protractor:e2e'
+    'clean:dist',
+    'wiredep:e2e',
+    'makeDist',
+    'clean:server',
+    'concurrent:test',
+    'autoprefixer',
+    'connect:dist',
+    'karma',
+    'protractor:e2e'
   ]);
 
   grunt.registerTask('testE2e', [
-      'concurrent:test',
-      'autoprefixer',
-      'connect:dist',
-      'protractor:e2e'
+    'concurrent:test',
+    'autoprefixer',
+    'connect:dist',
+    'protractor:e2e'
   ]);
 
   grunt.registerTask('serveE2e', [
-      'concurrent:test',
-      'autoprefixer',
-      'connect:dist',
-      'protractor:e2e',
-      'watch'
+    'concurrent:test',
+    'autoprefixer',
+    'connect:dist',
+    'protractor:e2e',
+    'watch'
   ]);
 
   grunt.registerTask('build', [
     'clean:dist',
-    'bowerInstall',
+    'wiredep:build',
+    'makeDist'
+  ]);
+
+  grunt.registerTask('makeDist', [
     'injector',
     'lineending',
     'nggettext_extract',
+    'taskHelper',
     'useminPrepare',
     'concurrent:dist',
     'autoprefixer',
@@ -517,10 +714,11 @@ module.exports = function (grunt) {
     'ngdocs'
   ]);
 
+
   grunt.registerTask('default', [
     'newer:jshint',
     'test',
-    'build'//,
+    'build' //,
     //'testE2e'
   ]);
 };

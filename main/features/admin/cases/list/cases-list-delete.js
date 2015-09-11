@@ -1,12 +1,28 @@
+/** Copyright (C) 2015 Bonitasoft S.A.
+ * BonitaSoft, 31 rue Gustave Eiffel - 38000 Grenoble
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2.0 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 (function() {
   'use strict';
 
-  angular.module('org.bonita.features.admin.cases.list.delete', [
-    'org.bonita.common.resources',
-    'gettext',
+  angular.module('org.bonitasoft.features.admin.cases.list.delete', [
+    'org.bonitasoft.common.resources',
+    'org.bonitasoft.services.i18n',
     'ui.bootstrap',
   ])
-  .controller('ActiveCaseDeleteCtrl', ['$scope', '$modal', 'caseAPI', 'gettextCatalog', '$q',  CaseDeleteCtrl])
+  .controller('ActiveCaseDeleteCtrl', ['$scope', '$modal', 'caseAPI', 'i18nService', '$q',  CaseDeleteCtrl])
   .directive('activeCaseDelete',
     function () {
       return {
@@ -18,7 +34,7 @@
         controllerAs : 'deleteCtrl'
       };
     })
-  .controller('ArchivedCaseDeleteCtrl', ['$scope', '$modal', 'archivedCaseAPI', 'gettextCatalog', '$q', CaseDeleteCtrl])
+  .controller('ArchivedCaseDeleteCtrl', ['$scope', '$modal', 'archivedCaseAPI', 'i18nService', '$q', CaseDeleteCtrl])
   .directive('archivedCaseDelete',
     function() {
       return {
@@ -42,10 +58,10 @@
    * @requires $scope
    * @requires $modal
    * @requires caseAPI
-   * @requires gettextCatalog
+   * @requires i18nService
    */
   /* jshint -W003 */
-  function CaseDeleteCtrl($scope, $modal, caseAPI, gettextCatalog, $q) {
+  function CaseDeleteCtrl($scope, $modal, caseAPI, i18nService, $q) {
 
     var vm = this;
     /**
@@ -115,10 +131,10 @@
         $scope.$emit('caselist:notify', {
           type: 'success',
           status: ((nbOfDeletedCases===1)?
-            gettextCatalog.getString('{{nbOfDeletedCases}} case deleted successfully', {
+            i18nService.getKey('caselist.delete.single', {
             nbOfDeletedCases: nbOfDeletedCases
           }):
-            gettextCatalog.getString('{{nbOfDeletedCases}} cases deleted successfully', {
+            i18nService.getKey('caselist.delete.multiple', {
             nbOfDeletedCases: nbOfDeletedCases
           }))
         });

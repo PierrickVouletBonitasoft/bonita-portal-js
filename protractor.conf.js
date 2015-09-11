@@ -5,7 +5,7 @@ exports.config = {
   //seleniumPort: null,
   chromeDriver: './node_modules/protractor/selenium/chromedriver',
   //seleniumArgs: [],
-  directConnect: true,
+  directConnect: false,
 
   specs: [
       'test/e2e/**/*.e2e.js'
@@ -13,7 +13,8 @@ exports.config = {
   suites : {
     'arch-case-list-deletion': ['test/e2e/features/admin/cases/arch-case-list-buttons.e2e.js'],
     'arch-case-list': ['test/e2e/features/admin/cases/arch-case-*.e2e.js'],
-    'arch-case-list-filter': ['test/e2e/features/admin/cases/arch-case-list-filter.e2e.js']
+    'arch-case-list-filter': ['test/e2e/features/admin/cases/arch-case-list-filter.e2e.js'],
+    'process-details-information': ['test/e2e/features/admin/processes/details/*.e2e.js']
   },
 
   capabilities: {
@@ -25,6 +26,9 @@ exports.config = {
   rootElement: 'body',
 
   onPrepare: function() {
+    browser.bonitaSpEdition = function () {
+      return false;
+    };
   // The require statement must be down here, since jasmine-reporters
   // needs jasmine to be in the global and protractor does not guarantee
   // this until inside the onPrepare function.

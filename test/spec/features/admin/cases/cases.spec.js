@@ -7,7 +7,7 @@
     var scope, state; //= jasmine.createSpyObj('$stateProvider',['state']);
 
     describe('state provider for cases', function() {
-      beforeEach(module('org.bonita.features.admin.cases.list', function($stateProvider) {
+      beforeEach(module('org.bonitasoft.features.admin.cases.list', function($stateProvider) {
         $stateProvider.state('bonita', {});
       }));
 
@@ -16,7 +16,7 @@
       }));
       it('should add a new state matching the case main entry point', inject(function() {
         var caseListStateConfig = state.get('bonita.cases');
-        expect(caseListStateConfig.url).toBe('/admin/cases/list?processId&supervisor_id');
+        expect(caseListStateConfig.url).toBe('/admin/cases/list?processId&supervisor_id&caseStateFilter');
         expect(caseListStateConfig.abstract).toBeTruthy();
         expect(caseListStateConfig.templateUrl).toBe('features/admin/cases/list/cases.html');
       }));
@@ -46,7 +46,7 @@
       }));
     });
     describe('bonita.cases Controller', function()  {
-      beforeEach(module('org.bonita.features.admin.cases'));
+      beforeEach(module('org.bonitasoft.features.admin.cases'));
       beforeEach(inject(function($rootScope, $controller) {
         scope = $rootScope.$new();
         $controller('CaseCtrl',
