@@ -33,9 +33,6 @@
                 <th class="case-column" >{{'Version' | translate}}</th>
                 <th bo-sorter="startDate" class="case-column" bo-sorter-title-asc="{{'sort by Start date ascending' | translate}}" bo-sorter-title-desc="{{'sort by Start date descending' | translate}}">{{'Start date' | translate}}</th>
                 <th class="case-column">{{'Started by' | translate}}</th>
-                <th class="text-right case-column">{{'Failed Flow Nodes' | translate}}</th>
-                <th class="text-right case-column">{{'Pending Flow Nodes' | translate}}</th>
-                
                 
                 <th data-ignore class="text-center">{{'Actions' | translate}}</th>
 
@@ -53,18 +50,6 @@
               <td class="case-detail">{{::case['Version']}}</td>
               <td class="case-detail">{{::caseCtrl.parseAndFormat(case['Start date'])}}</td>
               <td class="case-detail">{{::case['Started by'] || ('System' | translate)}}</td>
-              <td class="case-detail text-right" ng-switch="case.fullCase.state">
-                <div ng-switch-when="error">
-                  <span tooltip="{{'One or more connectors on case start or case end failed' | translate}}" tooltip-animation="false" tooltip-popup-delay="500" class="alert-error glyphicon glyphicon-exclamation-sign"></span>
-                  {{::case['Failed Flow Nodes']}}
-                </div>
-                <!--need a switch otherwise, the counter is not aligned with the glyphicon-->
-                <div ng-switch-default>
-                  {{::case['Failed Flow Nodes']}}
-                </div>
-
-              </td>
-              <td class="case-detail text-right">{{::(case['Pending Flow Nodes'] - case['Failed Flow Nodes'])}}</td>
               <td class="case-link text-center">
                 <case-visu process-id='{{::case.processDefinitionId.id}}' case-id='{{::case.ID}}'></case-visu>
                 <a id="case-detail-btn-{{::case.id}}" tooltip="{{'View case details' | translate }}"  tooltip-popup-delay="500" tooltip-animation="false" target="_top" ng-href="{{::caseCtrl.getLinkToCase(case)}}" class="open-link">

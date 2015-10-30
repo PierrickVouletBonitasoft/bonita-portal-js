@@ -30,14 +30,6 @@
       path: ['started_by', 'userName'],
       selected: true,
       defaultValue : 'System'
-    }, {
-      name: 'Failed Flow Nodes',
-      path: ['failedFlowNodes'],
-      selected: true
-    }, {
-      name: 'Pending Flow Nodes',
-      path: ['activeFlowNodes'],
-      selected: true
     }])
     .value('allCaseStatesValues', {
       started: 'Started',

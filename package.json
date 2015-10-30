@@ -58,6 +58,7 @@
     "node": ">=0.10.0"
   },
   "scripts": {
+    "start": "grunt serve",
     "test": "grunt test",
     "testwatch": "./node_modules/karma/bin/karma start karma.conf.js --auto-watch",
     "postinstall": "bower cache clean && bower install"
