@@ -26,16 +26,16 @@
   .config(['growlProvider',function (growlProvider) {
       growlProvider.globalPosition('top-center');
     }])
-  .controller('ActiveCaseListCtrl', ['$scope', 'caseAPI', 'casesColumns', 'defaultPageSize', 'defaultSort',
+  .controller('ActiveCaseListCtrl', ['$scope', 'store', 'caseAPI', 'processAPI', 'casesColumns', 'defaultPageSize', 'defaultSort',
     'defaultDeployedFields', 'defaultActiveCounterFields', '$location', 'pageSizes', 'defaultFilters', 'dateParser',
     '$anchorScroll', 'growl', 'moreDetailToken', 'tabName', 'manageTopUrl',
-    'processId', 'supervisorId', CaseListCtrl])
+    'processId', 'supervisorId', '$http', CaseListCtrl])
 
 
-  .controller('ArchivedCaseListCtrl', ['$scope', 'archivedCaseAPI', 'archivedCasesColumns', 'defaultPageSize',
+  .controller('ArchivedCaseListCtrl', ['$scope', 'store', 'archivedCaseAPI', 'processAPI', 'archivedCasesColumns', 'defaultPageSize',
     'archivedDefaultSort', 'defaultDeployedFields', 'defaultArchivedCounterFields', '$location', 'pageSizes', 'defaultFilters', 'dateParser',
     '$anchorScroll', 'growl', 'archivedMoreDetailToken', 'tabName', 'manageTopUrl',
-    'processId', 'supervisorId', CaseListCtrl]);
+    'processId', 'supervisorId', '$http', CaseListCtrl]);
 
   /**
    * @ngdoc object
@@ -58,7 +58,7 @@
    * @requires growl
    */
   /* jshint -W003 */
-  function CaseListCtrl($scope, caseAPI, casesColumns, defaultPageSize, defaultSort, defaultDeployedFields, defaultCounterFields, $location, pageSizes, defaultFilters, dateParser, $anchorScroll, growl, moreDetailToken, tabName, manageTopUrl, processId, supervisorId) {
+  function CaseListCtrl($scope, store, caseAPI, processAPI, casesColumns, defaultPageSize, defaultSort, defaultDeployedFields, defaultCounterFields, $location, pageSizes, defaultFilters, dateParser, $anchorScroll, growl, moreDetailToken, tabName, manageTopUrl, processId, supervisorId, $http) {
     var vm = this;
     var modeDetailProcessToken = 'processmoredetailsadmin';
 
@@ -103,6 +103,21 @@
       moreDetailToken = moreDetailToken.replace('admin', 'pm');
       modeDetailProcessToken = modeDetailProcessToken.replace('admin', 'pm');
     }
+
+    $http({method: 'GET', url: '../API/system/session/unusedId'})
+      .success(function(data) {
+        store.load(processAPI, {
+          f: ['user_id=' + data.user_id]
+        }).then(function(processes) {
+          var processDefinitionIdsArray = processes.map(function(process) {
+            return process.id;
+          });
+          processDefinitionIdsArray.forEach(function(processId) {
+            defaultFiltersArray.push('processDefinitionId=' + processId);
+          });
+        });
+      });
+
     $scope.processManager = +!!supervisorId;
     $scope.supervisorId = supervisorId;
 

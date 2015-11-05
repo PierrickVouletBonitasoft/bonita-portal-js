@@ -8,7 +8,7 @@
     'ui.router',
     'org.bonita.common.resources.store'
   ])
-  .controller('ActiveCaseFilterController', ['$scope', 'store', 'processAPI', 'defaultFilters', 'caseStatesValues', 'activedTabName', CaseFilterController])
+  .controller('ActiveCaseFilterController', ['$scope', 'store', 'processAPI', 'defaultFilters', 'caseStatesValues', '$http', 'activedTabName', CaseFilterController])
   .directive('activeCaseFilters', function () {
     return {
       restrict: 'E',
@@ -18,7 +18,7 @@
       controllerAs : 'filterCtrl'
     };
   })
-  .controller('ArchivedCaseFilterController', ['$scope', 'store', 'processAPI', 'defaultFilters', 'caseStatesValues', CaseFilterController])
+  .controller('ArchivedCaseFilterController', ['$scope', 'store', 'processAPI', 'defaultFilters', 'caseStatesValues', '$http', CaseFilterController])
   .directive('archivedCaseFilters', function() {
     return {
       restrict: 'E',
@@ -41,7 +41,7 @@
    * @requires caseStatesValues
    */
   /* jshint -W003 */
-  function CaseFilterController($scope, store, processAPI, defaultFilters, caseStatesValues) {
+  function CaseFilterController($scope, store, processAPI, defaultFilters, caseStatesValues, $http) {
     $scope.selectedFilters.selectedApp = defaultFilters.appName;
     $scope.selectedFilters.selectedVersion = defaultFilters.appVersion;
     $scope.selectedFilters.selectedStatus = defaultFilters.caseStatus;
@@ -77,9 +77,14 @@
       });
     };
 
-    store.load(processAPI, {
-      f: processFilter
-    }).then(vm.initFilters);
+    $http({method: 'GET', url: '../API/system/session/unusedId'})
+      .success(function(data) {
+        processFilter.push('user_id=' + data.user_id);
+
+        store.load(processAPI, {
+          f: processFilter
+        }).then(vm.initFilters);
+      });
 
     vm.selectApp = function(selectedAppName) {
       if (selectedAppName) {

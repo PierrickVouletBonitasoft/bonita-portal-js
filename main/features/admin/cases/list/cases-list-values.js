@@ -30,6 +30,11 @@
       path: ['started_by', 'userName'],
       selected: true,
       defaultValue : 'System'
+    }, {
+      name: 'Synopsis',
+      path: ['variable', 'synopsis'],
+      selected: true,
+      defaultValue : 'No data'
     }])
     .value('allCaseStatesValues', {
       started: 'Started',
@@ -83,6 +88,11 @@
       name: 'State',
       path: ['state'],
       selected: true
+    }, {
+      name: 'Synopsis',
+      path: ['variable', 'synopsis'],
+      selected: true,
+      defaultValue : 'No data'
     }])
     .
     value('archivedCaseStatesValues', {
