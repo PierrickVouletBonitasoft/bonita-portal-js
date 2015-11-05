@@ -29,13 +29,13 @@
   .controller('ActiveCaseListCtrl', ['$scope', 'store', 'caseAPI', 'processAPI', 'casesColumns', 'defaultPageSize', 'defaultSort',
     'defaultDeployedFields', 'defaultActiveCounterFields', '$location', 'pageSizes', 'defaultFilters', 'dateParser',
     '$anchorScroll', 'growl', 'moreDetailToken', 'tabName', 'manageTopUrl',
-    'processId', 'supervisorId', '$http', CaseListCtrl])
+    'processId', 'supervisorId', 'processName', 'processVersion', 'caseSearch', '$http', CaseListCtrl])
 
 
   .controller('ArchivedCaseListCtrl', ['$scope', 'store', 'archivedCaseAPI', 'processAPI', 'archivedCasesColumns', 'defaultPageSize',
     'archivedDefaultSort', 'defaultDeployedFields', 'defaultArchivedCounterFields', '$location', 'pageSizes', 'defaultFilters', 'dateParser',
     '$anchorScroll', 'growl', 'archivedMoreDetailToken', 'tabName', 'manageTopUrl',
-    'processId', 'supervisorId', '$http', CaseListCtrl]);
+    'processId', 'supervisorId', 'processName', 'processVersion', 'caseSearch', '$http', CaseListCtrl]);
 
   /**
    * @ngdoc object
@@ -58,7 +58,7 @@
    * @requires growl
    */
   /* jshint -W003 */
-  function CaseListCtrl($scope, store, caseAPI, processAPI, casesColumns, defaultPageSize, defaultSort, defaultDeployedFields, defaultCounterFields, $location, pageSizes, defaultFilters, dateParser, $anchorScroll, growl, moreDetailToken, tabName, manageTopUrl, processId, supervisorId, $http) {
+  function CaseListCtrl($scope, store, caseAPI, processAPI, casesColumns, defaultPageSize, defaultSort, defaultDeployedFields, defaultCounterFields, $location, pageSizes, defaultFilters, dateParser, $anchorScroll, growl, moreDetailToken, tabName, manageTopUrl, processId, supervisorId, processName, processVersion, caseSearch, $http) {
     var vm = this;
     var modeDetailProcessToken = 'processmoredetailsadmin';
 
@@ -120,6 +120,9 @@
 
     $scope.processManager = +!!supervisorId;
     $scope.supervisorId = supervisorId;
+    $scope.processName = processName;
+    $scope.processVersion = processVersion;
+    $scope.caseSearch = caseSearch;
 
     $scope.archivedTabName = !!tabName;
     $scope.searchOptions = {filters:[], searchSort : defaultSort + ' ' +  'ASC'};

@@ -55,6 +55,11 @@
     $scope.selectedFilters.currentSearch = '';
     var vm = this;
 
+    var loadedVersion = '';
+    if ($scope.processVersion) {
+      loadedVersion = $scope.processVersion;
+    }
+
     var processFilter = [];
     if ($scope.supervisorId) {
       processFilter.push('supervisor_id=' + $scope.supervisorId);
@@ -77,13 +82,25 @@
       });
     };
 
+    vm.initFiltersFromParameters = function() {
+      if ($scope.processName) {
+        vm.selectApp($scope.processName);
+      }
+
+      if ($scope.caseSearch) {
+        $scope.selectedFilters.currentSearch = $scope.caseSearch;
+        vm.submitSearch();
+      }
+    };
+
     $http({method: 'GET', url: '../API/system/session/unusedId'})
       .success(function(data) {
         //processFilter.push('user_id=' + data.user_id);
 
         store.load(processAPI, {
           f: processFilter
-        }).then(vm.initFilters);
+        }).then(vm.initFilters)
+          .then(vm.initFiltersFromParameters);
       });
 
     vm.selectApp = function(selectedAppName) {
@@ -147,6 +164,7 @@
       $scope.pagination.currentPage = 1;
       $scope.$emit('caselist:search');
     };
+
     //we cannot watch the updateFilter function directly otherwise
     //it will not be mockable
     $scope.$watch('selectedFilters.selectedApp', function() {
@@ -156,7 +174,13 @@
       } else if ($scope.selectedFilters.selectedApp !== defaultFilters.appName) {
         delete $scope.selectedFilters.processId;
       }
+
+      if (loadedVersion && $scope.selectedFilters.selectedApp !== defaultFilters.appName) {
+        vm.selectVersion(loadedVersion);
+        loadedVersion = '';
+      }
     });
+
     $scope.$watch('selectedFilters.selectedVersion', function() {
       vm.filterProcessDefinition($scope.selectedFilters.selectedVersion);
     });
