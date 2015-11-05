@@ -113,7 +113,7 @@
             return process.id;
           });
           processDefinitionIdsArray.forEach(function(processId) {
-            defaultFiltersArray.push('processDefinitionId=' + processId);
+            //defaultFiltersArray.push('processDefinitionId=' + processId);
           });
         });
       });

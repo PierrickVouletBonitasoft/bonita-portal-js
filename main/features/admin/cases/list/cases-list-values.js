@@ -32,7 +32,7 @@
       defaultValue : 'System'
     }, {
       name: 'Synopsis',
-      path: ['variable', 'synopsis'],
+      path: ['searchIndex1Value'],
       selected: true,
       defaultValue : 'No data'
     }])
@@ -90,7 +90,7 @@
       selected: true
     }, {
       name: 'Synopsis',
-      path: ['variable', 'synopsis'],
+      path: ['searchIndex1Value'],
       selected: true,
       defaultValue : 'No data'
     }])

@@ -79,7 +79,7 @@
 
     $http({method: 'GET', url: '../API/system/session/unusedId'})
       .success(function(data) {
-        processFilter.push('user_id=' + data.user_id);
+        //processFilter.push('user_id=' + data.user_id);
 
         store.load(processAPI, {
           f: processFilter
