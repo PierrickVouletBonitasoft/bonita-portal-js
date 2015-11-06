@@ -29,13 +29,15 @@
   .controller('ActiveCaseListCtrl', ['$scope', 'store', 'caseAPI', 'processAPI', 'casesColumns', 'defaultPageSize', 'defaultSort',
     'defaultDeployedFields', 'defaultActiveCounterFields', '$location', 'pageSizes', 'defaultFilters', 'dateParser',
     '$anchorScroll', 'growl', 'moreDetailToken', 'manageTopUrl',
-    'processId', 'supervisorId', 'processName', 'processVersion', 'caseSearch', '$http', CaseListCtrl])
+    'processId', 'supervisorId', 'activeProcessName', 'activeProcessVersion', 'activeCaseSearch',
+    'archivedProcessName', 'archivedProcessVersion', 'archivedCaseSearch', '$http', CaseListCtrl])
 
 
   .controller('ArchivedCaseListCtrl', ['$scope', 'store', 'archivedCaseAPI', 'processAPI', 'archivedCasesColumns', 'defaultPageSize',
     'archivedDefaultSort', 'defaultDeployedFields', 'defaultArchivedCounterFields', '$location', 'pageSizes', 'defaultFilters', 'dateParser',
     '$anchorScroll', 'growl', 'archivedMoreDetailToken', 'manageTopUrl',
-    'processId', 'supervisorId', 'processName', 'processVersion', 'caseSearch', '$http', CaseListCtrl]);
+    'processId', 'supervisorId', 'activeProcessName', 'activeProcessVersion', 'activeCaseSearch',
+    'archivedProcessName', 'archivedProcessVersion', 'archivedCaseSearch', '$http', CaseListCtrl]);
 
   /**
    * @ngdoc object
@@ -58,7 +60,8 @@
    * @requires growl
    */
   /* jshint -W003 */
-  function CaseListCtrl($scope, store, caseAPI, processAPI, casesColumns, defaultPageSize, defaultSort, defaultDeployedFields, defaultCounterFields, $location, pageSizes, defaultFilters, dateParser, $anchorScroll, growl, moreDetailToken, manageTopUrl, processId, supervisorId, processName, processVersion, caseSearch, $http) {
+  function CaseListCtrl($scope, store, caseAPI, processAPI, casesColumns, defaultPageSize, defaultSort, defaultDeployedFields, defaultCounterFields, $location, pageSizes, defaultFilters, dateParser, $anchorScroll, growl, moreDetailToken, manageTopUrl, processId, supervisorId,
+                        activeProcessName, activeProcessVersion, activeCaseSearch, archivedProcessName, archivedProcessVersion, archivedCaseSearch, $http) {
     var vm = this;
     var modeDetailProcessToken = 'processmoredetailsadmin';
 
@@ -120,9 +123,12 @@
 
     $scope.processManager = +!!supervisorId;
     $scope.supervisorId = supervisorId;
-    $scope.processName = processName;
-    $scope.processVersion = processVersion;
-    $scope.caseSearch = caseSearch;
+    $scope.activeProcessName = activeProcessName;
+    $scope.activeProcessVersion = activeProcessVersion;
+    $scope.activeCaseSearch = activeCaseSearch;
+    $scope.archivedProcessName = archivedProcessName;
+    $scope.archivedProcessVersion = archivedProcessVersion;
+    $scope.archivedCaseSearch = archivedCaseSearch;
 
     $scope.searchOptions = {filters:[], searchSort : defaultSort + ' ' +  'ASC'};
     $scope.searchOptions.filters = angular.copy(defaultFiltersArray);

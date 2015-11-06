@@ -51,6 +51,8 @@
     .value('defaultPageSize', 25)
     .value('defaultSort', 'id')
     .value('archivedDefaultSort', 'sourceObjectId')
+    .value('archivedFilterType', true)
+    .value('activeFilterType', false)
     .value('defaultFilters', {
       appVersion: 'All',
       appName: 'All',

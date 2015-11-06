@@ -8,7 +8,7 @@
     'ui.router',
     'org.bonita.common.resources.store'
   ])
-  .controller('ActiveCaseFilterController', ['$scope', 'store', 'processAPI', 'defaultFilters', 'caseStatesValues', '$http', CaseFilterController])
+  .controller('ActiveCaseFilterController', ['$scope', 'store', 'processAPI', 'defaultFilters', 'caseStatesValues', '$http', 'activeFilterType', CaseFilterController])
   .directive('activeCaseFilters', function () {
     return {
       restrict: 'E',
@@ -18,7 +18,7 @@
       controllerAs : 'filterCtrl'
     };
   })
-  .controller('ArchivedCaseFilterController', ['$scope', 'store', 'processAPI', 'defaultFilters', 'caseStatesValues', '$http', CaseFilterController])
+  .controller('ArchivedCaseFilterController', ['$scope', 'store', 'processAPI', 'defaultFilters', 'caseStatesValues', '$http', 'archivedFilterType', CaseFilterController])
   .directive('archivedCaseFilters', function() {
     return {
       restrict: 'E',
@@ -41,7 +41,7 @@
    * @requires caseStatesValues
    */
   /* jshint -W003 */
-  function CaseFilterController($scope, store, processAPI, defaultFilters, caseStatesValues, $http) {
+  function CaseFilterController($scope, store, processAPI, defaultFilters, caseStatesValues, $http, archived) {
     $scope.selectedFilters.selectedApp = defaultFilters.appName;
     $scope.selectedFilters.selectedVersion = defaultFilters.appVersion;
     $scope.selectedFilters.selectedStatus = defaultFilters.caseStatus;
@@ -56,8 +56,10 @@
     var vm = this;
 
     var loadedVersion = '';
-    if ($scope.processVersion) {
-      loadedVersion = $scope.processVersion;
+    if (archived && $scope.archivedProcessVersion) {
+      loadedVersion = $scope.archivedProcessVersion;
+    } else if (!archived && $scope.activeProcessVersion) {
+      loadedVersion = $scope.activeProcessVersion;
     }
 
     var processFilter = [];
@@ -83,12 +85,17 @@
     };
 
     vm.initFiltersFromParameters = function() {
-      if ($scope.processName) {
-        vm.selectApp($scope.processName);
+      if (archived && $scope.archivedProcessName) {
+        vm.selectApp($scope.archivedProcessName);
+      } else if (!archived && $scope.activeProcessName) {
+        vm.selectApp($scope.activeProcessName);
       }
 
-      if ($scope.caseSearch) {
-        $scope.selectedFilters.currentSearch = $scope.caseSearch;
+      if (archived && $scope.archivedCaseSearch) {
+        $scope.selectedFilters.currentSearch = $scope.archivedCaseSearch;
+        vm.submitSearch();
+      } else if (!archived && $scope.activeCaseSearch) {
+        $scope.selectedFilters.currentSearch = $scope.activeCaseSearch;
         vm.submitSearch();
       }
     };

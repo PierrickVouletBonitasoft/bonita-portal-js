@@ -19,7 +19,7 @@
           }
         });
         $stateProvider.state('bonita.cases', {
-          url: '/admin/cases/list?processId&supervisor_id&process_name&process_version&case_search',
+          url: '/admin/cases/list?processId&supervisor_id&active_process_name&active_process_version&active_case_search&archived_process_name&archived_process_version&archived_case_search',
           templateUrl: 'features/admin/cases/list/cases.html',
           abstract: true,
           controller: 'CaseCtrl',
@@ -49,19 +49,34 @@
                 return $stateParams.processId;
               }
             ],
-            processName: ['$stateParams',
+            activeProcessName: ['$stateParams',
               function($stateParams){
-                return $stateParams['process_name'];
+                return $stateParams['active_process_name'];
               }
             ],
-            processVersion: ['$stateParams',
+            activeProcessVersion: ['$stateParams',
               function($stateParams){
-                return $stateParams['process_version'];
+                return $stateParams['active_process_version'];
               }
             ],
-            caseSearch: ['$stateParams',
+            activeCaseSearch: ['$stateParams',
               function($stateParams){
-                return $stateParams['case_search'];
+                return $stateParams['active_case_search'];
+              }
+            ],
+            archivedProcessName: ['$stateParams',
+              function($stateParams){
+                return $stateParams['archived_process_name'];
+              }
+            ],
+            archivedProcessVersion: ['$stateParams',
+              function($stateParams){
+                return $stateParams['archived_process_version'];
+              }
+            ],
+            archivedCaseSearch: ['$stateParams',
+              function($stateParams){
+                return $stateParams['archived_case_search'];
               }
             ]
           }
