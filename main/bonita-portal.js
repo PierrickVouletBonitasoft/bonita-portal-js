@@ -8,7 +8,7 @@
     'ui.router',
     'org.bonita.services.i18n',
     'org.bonita.common.resources',
-    'org.bonita.features.admin'
+    'org.bonita.features.admin.cases.list'
   ])//parent state to use for every state in order to have the translations loaded correctly...
     .config([ '$stateProvider', function ($stateProvider) {
       $stateProvider.state('bonita', {
