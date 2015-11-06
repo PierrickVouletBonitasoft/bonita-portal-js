@@ -28,13 +28,13 @@
     }])
   .controller('ActiveCaseListCtrl', ['$scope', 'store', 'caseAPI', 'processAPI', 'casesColumns', 'defaultPageSize', 'defaultSort',
     'defaultDeployedFields', 'defaultActiveCounterFields', '$location', 'pageSizes', 'defaultFilters', 'dateParser',
-    '$anchorScroll', 'growl', 'moreDetailToken', 'tabName', 'manageTopUrl',
+    '$anchorScroll', 'growl', 'moreDetailToken', 'manageTopUrl',
     'processId', 'supervisorId', 'processName', 'processVersion', 'caseSearch', '$http', CaseListCtrl])
 
 
   .controller('ArchivedCaseListCtrl', ['$scope', 'store', 'archivedCaseAPI', 'processAPI', 'archivedCasesColumns', 'defaultPageSize',
     'archivedDefaultSort', 'defaultDeployedFields', 'defaultArchivedCounterFields', '$location', 'pageSizes', 'defaultFilters', 'dateParser',
-    '$anchorScroll', 'growl', 'archivedMoreDetailToken', 'tabName', 'manageTopUrl',
+    '$anchorScroll', 'growl', 'archivedMoreDetailToken', 'manageTopUrl',
     'processId', 'supervisorId', 'processName', 'processVersion', 'caseSearch', '$http', CaseListCtrl]);
 
   /**
@@ -58,7 +58,7 @@
    * @requires growl
    */
   /* jshint -W003 */
-  function CaseListCtrl($scope, store, caseAPI, processAPI, casesColumns, defaultPageSize, defaultSort, defaultDeployedFields, defaultCounterFields, $location, pageSizes, defaultFilters, dateParser, $anchorScroll, growl, moreDetailToken, tabName, manageTopUrl, processId, supervisorId, processName, processVersion, caseSearch, $http) {
+  function CaseListCtrl($scope, store, caseAPI, processAPI, casesColumns, defaultPageSize, defaultSort, defaultDeployedFields, defaultCounterFields, $location, pageSizes, defaultFilters, dateParser, $anchorScroll, growl, moreDetailToken, manageTopUrl, processId, supervisorId, processName, processVersion, caseSearch, $http) {
     var vm = this;
     var modeDetailProcessToken = 'processmoredetailsadmin';
 
@@ -124,7 +124,6 @@
     $scope.processVersion = processVersion;
     $scope.caseSearch = caseSearch;
 
-    $scope.archivedTabName = !!tabName;
     $scope.searchOptions = {filters:[], searchSort : defaultSort + ' ' +  'ASC'};
     $scope.searchOptions.filters = angular.copy(defaultFiltersArray);
     //never used it but initialized in this scope in order to keep track of sortOptions on table reload

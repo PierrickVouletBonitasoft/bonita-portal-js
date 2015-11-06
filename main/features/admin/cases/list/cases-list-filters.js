@@ -8,7 +8,7 @@
     'ui.router',
     'org.bonita.common.resources.store'
   ])
-  .controller('ActiveCaseFilterController', ['$scope', 'store', 'processAPI', 'defaultFilters', 'caseStatesValues', '$http', 'activedTabName', CaseFilterController])
+  .controller('ActiveCaseFilterController', ['$scope', 'store', 'processAPI', 'defaultFilters', 'caseStatesValues', '$http', CaseFilterController])
   .directive('activeCaseFilters', function () {
     return {
       restrict: 'E',

@@ -1,18 +1,14 @@
 
 <div>
-
-  <div ng-switch on="archivedTabName">
-    <archived-case-filters ng-switch-when="true"> </archived-case-filters>
-    <active-case-filters ng-switch-default> </active-case-filters>
-  </div>
+  <h1 id="case-title">{{'Active Cases' | translate }}</h1>
+  <active-case-filters> </active-case-filters>
   <div class="panel panel-default">
-
-    <div class="panel-heading title">{{ 'Case list' | translate }} <span id="infoPopover" class="glyphicon glyphicon-info-sign" popover="{{'Only cases from root processes are displayed in the table below. No details are available for cases started by call activities.' | translate}}" popover-trigger="mouseenter"></span> <span ng-click="caseCtrl.reinitCases()" tooltip="{{ 'Refresh' | translate}}" tooltip-animation="false" tooltip-popup-delay="300" class="case-list-refresh glyphicon glyphicon-repeat"></span></div>
+    <div class="panel-heading title"><span id="infoPopover" class="glyphicon glyphicon-info-sign" popover="{{'Only cases from root processes are displayed in the table below. No details are available for cases started by call activities.' | translate}}" popover-trigger="mouseenter"></span> <span ng-click="caseCtrl.reinitCases()" tooltip="{{ 'Refresh' | translate}}" tooltip-animation="false" tooltip-popup-delay="300" class="case-list-refresh glyphicon glyphicon-repeat"></span></div>
     <div class="panel-body">
       <div growl></div>
       <div ng-if="cases.length">
         <div class="col-md-12">
-          <table ng-if="!archivedTabName" bonitable bo-repeatable  on-sort="caseCtrl.updateSortField(sortOptions)" sort-options="sortOptions" resizable-column="$columns" resize-selector="tr th.case-column" class="table table-striped table-hover table-responsive">
+          <table bonitable bo-repeatable  on-sort="caseCtrl.updateSortField(sortOptions)" sort-options="sortOptions" resizable-column="$columns" resize-selector="tr th.case-column" class="table table-striped table-hover table-responsive">
             <thead>
               <tr>
                 <th colspan="{{$columns.length+2}}">
@@ -51,57 +47,6 @@
               <td class="case-detail">{{::case['Version']}}</td>
               <td class="case-detail">{{::caseCtrl.parseAndFormat(case['Start date'])}}</td>
               <td class="case-detail">{{::case['Started by'] || ('System' | translate)}}</td>
-              <td class="case-detail">{{::case['Synopsis'] || ('No data' | translate)}}</td>
-              <td class="case-link text-center">
-                <case-visu process-id='{{::case.processDefinitionId.id}}' case-id='{{::case.ID}}'></case-visu>
-                <a id="case-detail-btn-{{::case.id}}" tooltip="{{'View case details' | translate }}"  tooltip-popup-delay="500" tooltip-animation="false" target="_top" ng-href="{{::caseCtrl.getLinkToCase(case)}}" class="open-link">
-                  <span class="glyphicon glyphicon-eye-open"></span>
-                </a>
-              </td>
-            </tr>
-            </tbody>
-          </table>
-
-          <table ng-if="archivedTabName" bonitable bo-repeatable  on-sort="caseCtrl.updateSortField(sortOptions)" sort-options="sortOptions" resizable-column="$columns" resize-selector="tr th.case-column" class="table table-striped table-hover table-responsive">
-            <thead>
-              <tr>
-                <th colspan="{{$columns.length+2}}">
-                  <div class="pull-left case-action table-buttons">
-                    <div class="case-action table-buttons"> <archived-case-delete>{{'Delete' | translate}}</archived-case-delete></div>
-                  </div>
-                  <div class="pull-right table-buttons">
-                    <table-settings class="pull-right" page-size="pagination.itemsPerPage" sizes="pageSizes" columns="$columns"  update-page-size="caseCtrl.changeItemPerPage(size)"></table-settings>
-                       <span ng-if="pagination.total" id="cases-results-size-top" class="pull-right">{{ '{}-{} of {}' | translate | stringTemplater:[currentFirstResultIndex, currentLastResultIndex, pagination.total]}}</span>
-                  </div>
-                </th>
-              </tr>
-              <tr data-headers>
-                <th class="case-checkbox" data-ignore><div bo-selectall></div></th>
-                <th class="text-right case-column" bo-sorter="sourceObjectId" bo-sorter-title-asc="{{'sort by ID ascending' | translate}}" bo-sorter-title-desc="{{'sort by ID descending' | translate}}">{{'ID' | translate}}</th>
-                <th class="case-column" bo-sorter="name" bo-sorter-title-asc="{{'sort by Process name ascending' | translate}}" bo-sorter-title-desc="{{'sort by Process name descending' | translate}}">{{'Process name' | translate}}</th>
-                <th class="case-column" >{{'Version' | translate}}</th>
-                <th bo-sorter="startDate" class="case-column" bo-sorter-title-asc="{{'sort by Start date ascending' | translate}}" bo-sorter-title-desc="{{'sort by Start date descending' | translate}}">{{'Start date' | translate}}</th>
-                <th class="case-column" >{{'Started by' | translate}}</th>
-                <th bo-sorter="endDate" class="case-column" bo-sorter-title-asc="{{'sort by End date ascending' | translate}}" bo-sorter-title-desc="{{'sort by End date descending' | translate}}">{{'End date' | translate}}</th>
-                <th class="case-column" >{{'State' | translate}}</th>
-                <th class="case-column">{{'Synopsis' | translate}}</th>
-                <th data-ignore class="text-center">{{'Actions' | translate}}</th>
-              </tr>
-            </thead>
-            <tbody>
-
-            <tr ng-repeat="case in cases" id="caseId-{{::case.id}}" class="case-row" ng-class="{'info' : case.selected}">
-              <td class="case-checkbox">
-                <input id="case-check-{{::case.id}}" type="checkbox" bo-selector="case" >
-              </td>
-
-              <td class="case-detail text-right"><a id="case-detail-link-{{case.id}}" target="_top" href="{{::caseCtrl.getLinkToCase(case)}}">{{case['ID']}}</a></td>
-              <td class="case-detail"><a id="case-process-link-{{case.id}}" target="_top" href="{{::caseCtrl.getLinkToProcess(case)}}">{{case['Process name']}}</a></td>
-              <td class="case-detail">{{::case['Version']}}</td>
-              <td class="case-detail">{{::caseCtrl.parseAndFormat(case['Start date'])}}</td>
-              <td class="case-detail">{{::case['Started by'] || ('System' | translate)}}</td>
-              <td class="case-detail">{{::caseCtrl.parseAndFormat(case['End date'])}}</td>
-              <td class="case-detail">{{::case['State']}}</td>
               <td class="case-detail">{{::case['Synopsis'] || ('No data' | translate)}}</td>
               <td class="case-link text-center">
                 <case-visu process-id='{{::case.processDefinitionId.id}}' case-id='{{::case.ID}}'></case-visu>

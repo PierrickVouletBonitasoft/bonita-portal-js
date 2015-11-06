@@ -24,62 +24,21 @@
           abstract: true,
           controller: 'CaseCtrl',
           controllerAs: 'caseCtrl'
-        }).state('bonita.cases.active', {
+        }).state('bonita.cases.all', {
           url: '',
           views: {
             'case-list': {
               templateUrl: 'features/admin/cases/list/cases-list.html',
               controller: 'ActiveCaseListCtrl',
               controllerAs : 'caseCtrl'
-            }
-          },
-          resolve: {
-            tabName : ['activedTabName',
-              function(tabName){
-                return tabName;
-              }
-            ],
-            supervisorId: ['$stateParams',
-              function($stateParams) {
-                return $stateParams['supervisor_id'];
-              }
-            ],
-            processId: ['$stateParams',
-              function($stateParams){
-                return $stateParams.processId;
-              }
-            ],
-            processName: ['$stateParams',
-              function($stateParams){
-                return $stateParams['process_name'];
-              }
-            ],
-            processVersion: ['$stateParams',
-              function($stateParams){
-                return $stateParams['process_version'];
-              }
-            ],
-            caseSearch: ['$stateParams',
-              function($stateParams){
-                return $stateParams['case_search'];
-              }
-            ]
-          }
-        }).state('bonita.cases.archived', {
-          url: '/archived',
-          views: {
-            'case-list': {
-              templateUrl: 'features/admin/cases/list/cases-list.html',
+            },
+            'archived-case-list': {
+              templateUrl: 'features/admin/cases/list/archived-cases-list.html',
               controller: 'ArchivedCaseListCtrl',
-              controllerAs : 'caseCtrl'
+              controllerAs : 'archivedCaseCtrl'
             }
           },
           resolve: {
-            tabName : ['archivedTabName',
-              function(tabName){
-                return tabName;
-              }
-            ],
             supervisorId: ['$stateParams',
               function($stateParams) {
                 return $stateParams['supervisor_id'];
@@ -115,18 +74,6 @@
         //need to implement it ourselves...
         $scope.state = $state;
         $scope.currentToken = manageTopUrl.getCurrentPageToken();
-        $scope.casesStates = [];
-        $scope.casesStates.push({
-          state: 'bonita.cases.active',
-          title: 'Open cases',
-          htmlAttributeId: 'TabActiveCases'
-        });
-        $scope.casesStates.push({
-          state: 'bonita.cases.archived',
-          title: 'Archived cases',
-          tabName : 'archived',
-          htmlAttributeId: 'TabArchivedCases'
-        });
       }
     ]);
 })();

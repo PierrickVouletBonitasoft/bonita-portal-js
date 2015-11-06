@@ -58,7 +58,6 @@
     })
     .value('defaultDeployedFields', ['processDefinitionId', 'started_by', 'startedBySubstitute'])
     .value('defaultActiveCounterFields', ['activeFlowNodes', 'failedFlowNodes'])
-    .value('activedTabName', '')
     .value('archivedCasesColumns', [{
       name: 'ID',
       path: ['sourceObjectId'],
@@ -100,6 +99,5 @@
       error: 'Failed'
     })
     .value('archivedMoreDetailToken', 'archivedcasemoredetailsadmin')
-    .value('archivedTabName', 'archived')
     .value('defaultArchivedCounterFields', []);
 })();
