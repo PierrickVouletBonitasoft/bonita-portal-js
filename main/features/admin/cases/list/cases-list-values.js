@@ -18,46 +18,24 @@
       path: ['processDefinitionId', 'name'],
       selected: true
     }, {
-      name: 'Version',
-      path: ['processDefinitionId', 'version'],
-      selected: true
-    }, {
-      name: 'Start date',
-      path: ['start'],
-      selected: true
+      name: 'Synopsis',
+      path: ['searchIndex1Value'],
+      selected: true,
+      defaultValue : 'No data'
     }, {
       name: 'Started by',
       path: ['started_by', 'userName'],
       selected: true,
       defaultValue : 'System'
     }, {
-      name: 'Synopsis',
-      path: ['searchIndex1Value'],
-      selected: true,
-      defaultValue : 'No data'
+      name: 'Start date',
+      path: ['start'],
+      selected: true
+    }, {
+      name: 'Version',
+      path: ['processDefinitionId', 'version'],
+      selected: true
     }])
-    .value('allCaseStatesValues', {
-      started: 'Started',
-      error: 'Failed',
-      aborted: 'Aborted',
-      completed: 'Completed',
-      canceled: 'Canceled'
-    })
-    .value('caseStatesValues', {
-      error: 'With failures'
-    })
-    .value('moreDetailToken', 'casemoredetailsadmin')
-    .value('pageSizes', [25, 50, 100, 200])
-    .value('defaultPageSize', 25)
-    .value('defaultSort', 'id')
-    .value('archivedDefaultSort', 'sourceObjectId')
-    .value('defaultFilters', {
-      appVersion: 'All',
-      appName: 'All',
-      caseStatus: 'All'
-    })
-    .value('defaultDeployedFields', ['processDefinitionId', 'started_by', 'startedBySubstitute'])
-    .value('defaultActiveCounterFields', ['activeFlowNodes', 'failedFlowNodes'])
     .value('archivedCasesColumns', [{
       name: 'ID',
       path: ['sourceObjectId'],
@@ -67,37 +45,37 @@
       path: ['processDefinitionId', 'name'],
       selected: true
     }, {
-      name: 'Version',
-      path: ['processDefinitionId', 'version'],
-      selected: true
-    }, {
-      name: 'Start date',
-      path: ['start'],
-      selected: true
+      name: 'Synopsis',
+      path: ['searchIndex1Value'],
+      selected: true,
+      defaultValue : 'No data'
     }, {
       name: 'Started by',
       path: ['started_by', 'userName'],
       selected: true,
       defaultValue : 'System'
     }, {
-      name: 'End date',
-      path: ['end_date'],
+      name: 'Start date',
+      path: ['start'],
       selected: true
     }, {
-      name: 'State',
-      path: ['state'],
+      name: 'Version',
+      path: ['processDefinitionId', 'version'],
       selected: true
-    }, {
-      name: 'Synopsis',
-      path: ['searchIndex1Value'],
-      selected: true,
-      defaultValue : 'No data'
     }])
-    .
-    value('archivedCaseStatesValues', {
-      started: 'Started',
-      error: 'Failed'
-    })
+
+    .value('moreDetailToken', 'casemoredetailsadmin')
     .value('archivedMoreDetailToken', 'archivedcasemoredetailsadmin')
-    .value('defaultArchivedCounterFields', []);
+
+    .value('defaultSort', 'id')
+    .value('archivedDefaultSort', 'sourceObjectId')
+
+    .value('defaultDeployedFields', ['processDefinitionId', 'started_by', 'startedBySubstitute'])
+    .value('defaultCounterFields', [])
+    .value('pageSizes', [25, 50, 100, 200])
+    .value('defaultPageSize', 25)
+    .value('defaultFilters', {
+      appVersion: 'All',
+      appName: 'All'
+    });
 })();

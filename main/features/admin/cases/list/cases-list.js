@@ -26,16 +26,11 @@
   .config(['growlProvider',function (growlProvider) {
       growlProvider.globalPosition('top-center');
     }])
-  .controller('ActiveCaseListCtrl', ['$scope', 'store', 'caseAPI', 'processAPI', 'casesColumns', 'defaultPageSize', 'defaultSort',
-    'defaultDeployedFields', 'defaultActiveCounterFields', '$location', 'pageSizes', 'defaultFilters', 'dateParser',
-    '$anchorScroll', 'growl', 'moreDetailToken', 'manageTopUrl',
-    'processId', 'supervisorId', 'processName', 'processVersion', 'caseSearch', '$http', CaseListCtrl])
-
-
-  .controller('ArchivedCaseListCtrl', ['$scope', 'store', 'archivedCaseAPI', 'processAPI', 'archivedCasesColumns', 'defaultPageSize',
-    'archivedDefaultSort', 'defaultDeployedFields', 'defaultArchivedCounterFields', '$location', 'pageSizes', 'defaultFilters', 'dateParser',
-    '$anchorScroll', 'growl', 'archivedMoreDetailToken', 'manageTopUrl',
-    'processId', 'supervisorId', 'processName', 'processVersion', 'caseSearch', '$http', CaseListCtrl]);
+  .controller('CaseListCtrl', ['$scope', 'store', 'caseAPI', 'archivedCaseAPI', 'processAPI', 'casesColumns', 'archivedCasesColumns',
+    'defaultPageSize', 'defaultSort', 'archivedDefaultSort',
+    'defaultDeployedFields', 'defaultCounterFields', '$location', 'pageSizes', 'defaultFilters', 'dateParser',
+    '$anchorScroll', 'growl', 'moreDetailToken', 'archivedMoreDetailToken', 'manageTopUrl',
+    'processId', 'supervisorId', 'processName', 'processVersion', 'caseSearch', CaseListCtrl]);
 
   /**
    * @ngdoc object
@@ -58,7 +53,11 @@
    * @requires growl
    */
   /* jshint -W003 */
-  function CaseListCtrl($scope, store, caseAPI, processAPI, casesColumns, defaultPageSize, defaultSort, defaultDeployedFields, defaultCounterFields, $location, pageSizes, defaultFilters, dateParser, $anchorScroll, growl, moreDetailToken, manageTopUrl, processId, supervisorId, processName, processVersion, caseSearch, $http) {
+  function CaseListCtrl($scope, store, caseAPI, archivedCaseAPI, processAPI, casesColumns, archivedCasesColumns,
+                        defaultPageSize, defaultSort, archivedDefaultSort,
+                        defaultDeployedFields, defaultCounterFields, $location, pageSizes, defaultFilters, dateParser,
+                        $anchorScroll, growl, moreDetailToken, archivedMoreDetailToken, manageTopUrl,
+                        processId, supervisorId, processName, processVersion, caseSearch) {
     var vm = this;
     var modeDetailProcessToken = 'processmoredetailsadmin';
 
@@ -71,6 +70,7 @@
      * to display and retrieve the content
      */
     $scope.columns = casesColumns;
+    $scope.archivedColumns = archivedCasesColumns;
     /**
      * @ngdoc property
      * @name o.b.f.admin.cases.list.CaseListCtrl#pagination
@@ -83,9 +83,16 @@
       currentPage: 1,
       total: 0
     };
+    $scope.archivedPagination = {
+      itemsPerPage: defaultPageSize,
+      currentPage: 1,
+      total: 0
+    };
+
     $scope.selectedFilters = {
       processId : processId
     };
+
     $scope.pageSizes = pageSizes;
     /**
      * @ngdoc property
@@ -95,28 +102,19 @@
      * the array of cases to display
      */
     $scope.cases = undefined;
+    $scope.archivedCases = undefined;
+
     $scope.loading = true;
+    $scope.archivedLoading = true;
 
     var defaultFiltersArray = [];
     if (supervisorId) {
       defaultFiltersArray.push('supervisor_id=' + supervisorId);
       moreDetailToken = moreDetailToken.replace('admin', 'pm');
+      archivedMoreDetailToken = moreDetailToken.replace('admin', 'pm');
+
       modeDetailProcessToken = modeDetailProcessToken.replace('admin', 'pm');
     }
-
-    $http({method: 'GET', url: '../API/system/session/unusedId'})
-      .success(function(data) {
-        store.load(processAPI, {
-          f: ['user_id=' + data.user_id]
-        }).then(function(processes) {
-          var processDefinitionIdsArray = processes.map(function(process) {
-            return process.id;
-          });
-          processDefinitionIdsArray.forEach(function(processId) {
-            //defaultFiltersArray.push('processDefinitionId=' + processId);
-          });
-        });
-      });
 
     $scope.processManager = +!!supervisorId;
     $scope.supervisorId = supervisorId;
@@ -126,9 +124,17 @@
 
     $scope.searchOptions = {filters:[], searchSort : defaultSort + ' ' +  'ASC'};
     $scope.searchOptions.filters = angular.copy(defaultFiltersArray);
+
+    $scope.archivedSearchOptions = {filters:[], searchSort : archivedDefaultSort + ' ' +  'ASC'};
+    $scope.archivedSearchOptions.filters = angular.copy(defaultFiltersArray);
+
     //never used it but initialized in this scope in order to keep track of sortOptions on table reload
     $scope.sortOptions = {
       property: defaultSort,
+      direction : true
+    };
+    $scope.archivedSortOptions = {
+      property: archivedDefaultSort,
       direction : true
     };
 
@@ -137,12 +143,18 @@
       $scope.pagination.currentPage = 1;
       vm.searchForCases();
     };
+    vm.reinitArchivedCases = function() {
+      delete $scope.archivedSortOptions.searchSort;
+      $scope.archivedPagination.currentPage = 1;
+      vm.searchForArchivedCases();
+    };
 
     $scope.$on('caselist:http-error', handleHttpErrorEvent);
     $scope.$on('caselist:notify', addAlertEventHandler);
     $scope.$on('caselist:search', searchForCases);
 
     $scope.$watch('selectedFilters', buildFilters, true);
+    $scope.$watch('includeArchived', buildFilters, true);
 
     $scope.$watch('searchOptions', function() {
       $scope.pagination.currentPage = 1;
@@ -150,6 +162,14 @@
       //wait for them to update
       if(!$scope.selectedFilters.processId){
         vm.searchForCases();
+      }
+    }, true);
+    $scope.$watch('archivedSearchOptions', function() {
+      $scope.archivedPagination.currentPage = 1;
+      //if processId is still set it means filters have not been process and need to
+      //wait for them to update
+      if(!$scope.selectedFilters.processId){
+        vm.searchForArchivedCases();
       }
     }, true);
 
@@ -160,6 +180,13 @@
         $scope.searchOptions.searchSort = ((sortOptions && sortOptions.property) ?
           sortOptions.property : defaultSort) + ' ' + ((sortOptions && sortOptions.direction===false) ? 'DESC' : 'ASC');
         $scope.pagination.currentPage = 1;
+      }
+    };
+    vm.updateArchivedSortField = function updateArchivedSortField(sortOptions){
+      if (!$scope.archivedSearchOptions.searchSort || sortOptions) {
+        $scope.archivedSearchOptions.searchSort = ((sortOptions && sortOptions.property) ?
+            sortOptions.property : defaultSort) + ' ' + ((sortOptions && sortOptions.direction===false) ? 'DESC' : 'ASC');
+        $scope.archivedPagination.currentPage = 1;
       }
     };
 
@@ -182,6 +209,25 @@
         }
       }
     };
+    vm.onArchiveDropComplete = function($index, $data){
+      if($scope.archivedColumns && $scope.archivedColumns && $data){
+        var formerIndex = $scope.archivedColumns.indexOf($data);
+        if(formerIndex !== $index-1 && formerIndex>-1){
+          var i;
+          if(formerIndex>$index){
+            for (i = formerIndex -1;  i >= $index; i--) {
+              $scope.archivedColumns[i+1] = $scope.archivedColumns[i];
+            }
+            $scope.archivedColumns[$index] = $data;
+          }else{
+            for (i = formerIndex + 1;  i < $index; i++) {
+              $scope.archivedColumns[i-1] = $scope.archivedColumns[i];
+            }
+            $scope.archivedColumns[$index-1] = $data;
+          }
+        }
+      }
+    };
 
     vm.filterColumn = function(column) {
       return column && column.selected;
@@ -194,18 +240,25 @@
         vm.searchForCases();
       }
     };
-
-    vm.getLinkToCase = function(caseItem){
-      if(caseItem){
-        return manageTopUrl.getPath() + manageTopUrl.getSearch() + '#?id=' + caseItem.id + '&_p=' + (moreDetailToken || '') + '&' + manageTopUrl.getCurrentProfile();
+    vm.changeArchivedItemPerPage = function(pageSize) {
+      if (pageSize) {
+        $scope.archivedPagination.itemsPerPage = pageSize;
+        $scope.archivedPagination.currentPage = 1;
+        vm.searchForArchivedCases();
       }
     };
 
-    vm.getLinkToProcess = function(caseItem){
-      if(caseItem && caseItem.processDefinitionId){
-        return manageTopUrl.getPath() + manageTopUrl.getSearch() + '#?id=' + caseItem.processDefinitionId.id + '&_p=' + (modeDetailProcessToken || '') + '&' + manageTopUrl.getCurrentProfile();
-      }
-    };
+    //vm.getLinkToCase = function(caseItem){
+    //  if(caseItem){
+    //    return manageTopUrl.getPath() + manageTopUrl.getSearch() + '#?id=' + caseItem.id + '&_p=' + (moreDetailToken || '') + '&' + manageTopUrl.getCurrentProfile();
+    //  }
+    //};
+    //
+    //vm.getLinkToProcess = function(caseItem){
+    //  if(caseItem && caseItem.processDefinitionId){
+    //    return manageTopUrl.getPath() + manageTopUrl.getSearch() + '#?id=' + caseItem.processDefinitionId.id + '&_p=' + (modeDetailProcessToken || '') + '&' + manageTopUrl.getCurrentProfile();
+    //  }
+    //};
 
     vm.addAlertEventHandler = addAlertEventHandler;
     function addAlertEventHandler(event, msg) {
@@ -239,6 +292,7 @@
         filters.push('state=' + $scope.selectedFilters.selectedStatus);
       }
       $scope.searchOptions.filters = filters;
+      $scope.archivedSearchOptions.filters = filters;
     }
 
     vm.handleHttpErrorEvent = handleHttpErrorEvent;
@@ -308,6 +362,54 @@
         $scope.$emit('caselist:http-error', error);
       }).finally(function() {
         $scope.loading = false;
+        $anchorScroll();
+      });
+    }
+    vm.searchForArchivedCases = searchForArchivedCases;
+    function searchForArchivedCases() {
+      $scope.archivedLoading = true;
+      //these tmp variables are here to store currentSearch results
+      //and not store them directly in scope in case another search is called before
+      //the first one finishes. See cases-list-controller.spec.js#'page changes'
+      var casesForCurrentSearch = $scope.archivedCases = [];
+      var paginationForCurrentSearch = $scope.archivedPagination = angular.copy($scope.archivedPagination);
+      archivedCaseAPI.search({
+        p: paginationForCurrentSearch.currentPage - 1,
+        c: paginationForCurrentSearch.itemsPerPage,
+        d: defaultDeployedFields,
+        o: $scope.archivedSearchOptions.searchSort,
+        f: $scope.archivedSearchOptions.filters,
+        n: defaultCounterFields,
+        s: $scope.selectedFilters.currentSearch
+      }).$promise.then(function mapCases(fullCases) {
+        paginationForCurrentSearch.total = fullCases && fullCases.resource && fullCases.resource.pagination && fullCases.resource.pagination.total;
+        $scope.archivedCurrentFirstResultIndex = ((paginationForCurrentSearch.currentPage - 1) * paginationForCurrentSearch.itemsPerPage) + 1;
+        $scope.archivedCurrentLastResultIndex = Math.min($scope.archivedCurrentFirstResultIndex + paginationForCurrentSearch.itemsPerPage - 1, paginationForCurrentSearch.total);
+        if(fullCases && fullCases.resource){
+          fullCases.resource.map(function selectOnlyInterestingFields(fullCase) {
+            var simpleCase = {};
+            for (var i = 0; i < $scope.archivedColumns.length; i++) {
+              var currentCase = fullCase;
+              for (var j = 0; j < $scope.archivedColumns[i].path.length; j++) {
+                currentCase = currentCase && currentCase[$scope.archivedColumns[i].path[j]];
+              }
+              simpleCase[$scope.archivedColumns[i].name] = currentCase;
+            }
+            simpleCase.id = fullCase.id;
+            simpleCase.processDefinitionId = fullCase.processDefinitionId;
+            simpleCase.fullCase = fullCase;
+            return simpleCase;
+          }).forEach(function(caseItem){
+            casesForCurrentSearch.push(caseItem);
+          });
+        }
+      }, function(error) {
+        paginationForCurrentSearch.total = 0;
+        $scope.archivedCurrentFirstResultIndex = 0;
+        $scope.archivedCurrentLastResultIndex = 0;
+        $scope.$emit('caselist:http-error', error);
+      }).finally(function() {
+        $scope.archivedLoading = false;
         $anchorScroll();
       });
     }

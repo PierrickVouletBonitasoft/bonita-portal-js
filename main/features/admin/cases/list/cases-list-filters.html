@@ -21,14 +21,10 @@
         </ul>
       </div>
     </div>
-    <div class="col-md-3 button-filter">{{'Case state' | translate}}
-      <div class="btn-group" dropdown id="case-app-status-filter">
-        <button type="button" class="btn btn-default dropdown-toggle">{{caseStatesValues[selectedFilters.selectedStatus] | translate}} <span class="caret"></span></button>
-        <ul class="dropdown-menu" role="menu">
-          <li ng-click="filterCtrl.selectCaseStatus(defaultFilters.caseStatus)"><a>{{defaultFilters.caseStatus | translate}}</a></li>
-          <li class="divider"></li>
-          <li ng-click="filterCtrl.selectCaseStatus('error')"><a>{{'With failures' | translate}}</a></li>
-        </ul>
+    <div class="col-md-3">{{'Include Archived' | translate}}
+      <div class="btn-group" id="case-include-archived-filter">
+        <button type="button" class="btn btn-default" >ON</button>
+        <button type="button" class="btn btn-default">OFF</button>
       </div>
     </div>
     <div class="col-md-3">

@@ -8,23 +8,13 @@
     'ui.router',
     'org.bonita.common.resources.store'
   ])
-  .controller('ActiveCaseFilterController', ['$scope', 'store', 'processAPI', 'defaultFilters', 'caseStatesValues', '$http', CaseFilterController])
-  .directive('activeCaseFilters', function () {
+  .controller('CaseFilterController', ['$scope', 'store', 'processAPI', 'defaultFilters', '$http', CaseFilterController])
+  .directive('caseFilters', function () {
     return {
       restrict: 'E',
-      require: '^ActiveCaseListCtrl',
+      require: '^CaseListCtrl',
       templateUrl: 'features/admin/cases/list/cases-list-filters.html',
-      controller: 'ActiveCaseFilterController',
-      controllerAs : 'filterCtrl'
-    };
-  })
-  .controller('ArchivedCaseFilterController', ['$scope', 'store', 'processAPI', 'defaultFilters', 'caseStatesValues', '$http', CaseFilterController])
-  .directive('archivedCaseFilters', function() {
-    return {
-      restrict: 'E',
-      require: '^ArchivedCaseListCtrl',
-      templateUrl: 'features/admin/cases/list/archived-cases-list-filters.html',
-      controller: 'ArchivedCaseFilterController',
+      controller: 'CaseFilterController',
       controllerAs : 'filterCtrl'
     };
   });
@@ -41,17 +31,15 @@
    * @requires caseStatesValues
    */
   /* jshint -W003 */
-  function CaseFilterController($scope, store, processAPI, defaultFilters, caseStatesValues, $http) {
+  function CaseFilterController($scope, store, processAPI, defaultFilters, $http) {
     $scope.selectedFilters.selectedApp = defaultFilters.appName;
     $scope.selectedFilters.selectedVersion = defaultFilters.appVersion;
-    $scope.selectedFilters.selectedStatus = defaultFilters.caseStatus;
     $scope.defaultFilters = defaultFilters;
-    $scope.caseStatesValues = caseStatesValues;
-    $scope.caseStatesValues[defaultFilters.caseStatus] = defaultFilters.caseStatus;
     $scope.apps = [];
     $scope.versions = [];
     $scope.appNames = [];
     $scope.allCasesSelected = false;
+    $scope.includeArchived = false;
     $scope.selectedFilters.currentSearch = '';
     var vm = this;
 
@@ -122,14 +110,6 @@
       }
     };
 
-    vm.selectCaseStatus = function(selectCaseStatus) {
-      if (selectCaseStatus && selectCaseStatus !== defaultFilters.caseStatus) {
-        $scope.selectedFilters.selectedStatus = selectCaseStatus;
-      } else {
-        $scope.selectedFilters.selectedStatus = defaultFilters.caseStatus;
-      }
-    };
-
     vm.filterVersion = function(appName) {
       $scope.versions = [];
       $scope.selectedFilters.selectedVersion = defaultFilters.appVersion;
@@ -163,6 +143,10 @@
     vm.submitSearch = function(){
       $scope.pagination.currentPage = 1;
       $scope.$emit('caselist:search');
+    };
+
+    vm.includeArchived = function(){
+      $scope.includeArchived = !$scope.includeArchived;
     };
 
     //we cannot watch the updateFilter function directly otherwise

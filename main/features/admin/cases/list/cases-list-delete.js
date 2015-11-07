@@ -11,7 +11,7 @@
     function () {
       return {
         restrict: 'E',
-        require: '^ActiveCaseListCtrl',
+        require: '^CaseListCtrl',
         transclude : true,
         controller: 'ActiveCaseDeleteCtrl',
         template : '<button id="delete-button" type="button" class="btn btn-default" ng-click="deleteCtrl.confirmDeleteSelectedCases()" ng-disabled="deleteCtrl.checkNoCasesSelected()"><div ng-transclude></div></button>',

@@ -29,13 +29,8 @@
           views: {
             'case-list': {
               templateUrl: 'features/admin/cases/list/cases-list.html',
-              controller: 'ActiveCaseListCtrl',
+              controller: 'CaseListCtrl',
               controllerAs : 'caseCtrl'
-            },
-            'archived-case-list': {
-              templateUrl: 'features/admin/cases/list/archived-cases-list.html',
-              controller: 'ArchivedCaseListCtrl',
-              controllerAs : 'archivedCaseCtrl'
             }
           },
           resolve: {
