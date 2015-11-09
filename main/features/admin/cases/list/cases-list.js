@@ -155,6 +155,7 @@
     $scope.$on('caselist:http-error', handleHttpErrorEvent);
     $scope.$on('caselist:notify', addAlertEventHandler);
     $scope.$on('caselist:search', searchForCases);
+    $scope.$on('caselist:search', searchForArchivedCases);
 
     $scope.$watch('selectedFilters', buildFilters, true);
 
