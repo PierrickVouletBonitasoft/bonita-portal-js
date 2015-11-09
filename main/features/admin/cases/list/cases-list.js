@@ -120,13 +120,15 @@
     $scope.supervisorId = supervisorId;
     $scope.processName = processName;
     $scope.processVersion = processVersion;
-    $scope.includeArchived = includeArchived;
     $scope.caseSearch = caseSearch;
 
     $scope.searchOptions = {filters:[], searchSort : defaultSort + ' ' +  'ASC'};
     $scope.searchOptions.filters = angular.copy(defaultFiltersArray);
 
-    $scope.archivedSearchOptions = {filters:[], searchSort : archivedDefaultSort + ' ' +  'ASC', includeArchived: includeArchived};
+    $scope.archivedSearchOptions = {filters:[], searchSort : archivedDefaultSort + ' ' +  'ASC', includeArchived: false};
+    if (includeArchived === "true") {
+      $scope.archivedSearchOptions.includeArchived = true;
+    }
     $scope.archivedSearchOptions.filters = angular.copy(defaultFiltersArray);
 
     //never used it but initialized in this scope in order to keep track of sortOptions on table reload
