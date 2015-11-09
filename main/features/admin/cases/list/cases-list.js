@@ -30,7 +30,7 @@
     'defaultPageSize', 'defaultSort', 'archivedDefaultSort',
     'defaultDeployedFields', 'defaultCounterFields', '$location', 'pageSizes', 'defaultFilters', 'dateParser',
     '$anchorScroll', 'growl', 'moreDetailToken', 'archivedMoreDetailToken', 'manageTopUrl',
-    'processId', 'supervisorId', 'processName', 'processVersion', 'caseSearch', CaseListCtrl]);
+    'processId', 'supervisorId', 'processName', 'processVersion', 'includeArchived', 'caseSearch', CaseListCtrl]);
 
   /**
    * @ngdoc object
@@ -57,7 +57,7 @@
                         defaultPageSize, defaultSort, archivedDefaultSort,
                         defaultDeployedFields, defaultCounterFields, $location, pageSizes, defaultFilters, dateParser,
                         $anchorScroll, growl, moreDetailToken, archivedMoreDetailToken, manageTopUrl,
-                        processId, supervisorId, processName, processVersion, caseSearch) {
+                        processId, supervisorId, processName, processVersion, includeArchived, caseSearch) {
     var vm = this;
     var modeDetailProcessToken = 'processmoredetailsadmin';
 
@@ -120,12 +120,13 @@
     $scope.supervisorId = supervisorId;
     $scope.processName = processName;
     $scope.processVersion = processVersion;
+    $scope.includeArchived = includeArchived;
     $scope.caseSearch = caseSearch;
 
     $scope.searchOptions = {filters:[], searchSort : defaultSort + ' ' +  'ASC'};
     $scope.searchOptions.filters = angular.copy(defaultFiltersArray);
 
-    $scope.archivedSearchOptions = {filters:[], searchSort : archivedDefaultSort + ' ' +  'ASC'};
+    $scope.archivedSearchOptions = {filters:[], searchSort : archivedDefaultSort + ' ' +  'ASC', includeArchived: includeArchived};
     $scope.archivedSearchOptions.filters = angular.copy(defaultFiltersArray);
 
     //never used it but initialized in this scope in order to keep track of sortOptions on table reload
@@ -154,7 +155,6 @@
     $scope.$on('caselist:search', searchForCases);
 
     $scope.$watch('selectedFilters', buildFilters, true);
-    $scope.$watch('includeArchived', buildFilters, true);
 
     $scope.$watch('searchOptions', function() {
       $scope.pagination.currentPage = 1;
@@ -164,12 +164,14 @@
         vm.searchForCases();
       }
     }, true);
-    $scope.$watch('archivedSearchOptions', function() {
-      $scope.archivedPagination.currentPage = 1;
-      //if processId is still set it means filters have not been process and need to
-      //wait for them to update
-      if(!$scope.selectedFilters.processId){
-        vm.searchForArchivedCases();
+    $scope.$watch('archivedSearchOptions', function () {
+      if ($scope.archivedSearchOptions.includeArchived) {
+        $scope.archivedPagination.currentPage = 1;
+        //if processId is still set it means filters have not been process and need to
+        //wait for them to update
+        if (!$scope.selectedFilters.processId) {
+          vm.searchForArchivedCases();
+        }
       }
     }, true);
 
@@ -314,8 +316,6 @@
         }
       }
     }
-
-
 
     vm.searchForCases = searchForCases;
     function searchForCases() {

@@ -6,7 +6,8 @@
     'gettext',
     'ui.bootstrap',
     'ui.router',
-    'org.bonita.common.resources.store'
+    'org.bonita.common.resources.store',
+    'toggle-switch'
   ])
   .controller('CaseFilterController', ['$scope', 'store', 'processAPI', 'defaultFilters', '$http', CaseFilterController])
   .directive('caseFilters', function () {
@@ -39,7 +40,7 @@
     $scope.versions = [];
     $scope.appNames = [];
     $scope.allCasesSelected = false;
-    $scope.includeArchived = false;
+    $scope.selectedFilters.includeArchived = false;
     $scope.selectedFilters.currentSearch = '';
     var vm = this;
 
@@ -143,10 +144,6 @@
     vm.submitSearch = function(){
       $scope.pagination.currentPage = 1;
       $scope.$emit('caselist:search');
-    };
-
-    vm.includeArchived = function(){
-      $scope.includeArchived = !$scope.includeArchived;
     };
 
     //we cannot watch the updateFilter function directly otherwise
